@@ -1,8 +1,8 @@
 {
-  "name": "ecuador-gasto",
-  "version": "0.1.0",
+  "name": "ecuador-abierto",
+  "version": "0.2.0",
   "private": true,
-  "description": "Prototype: what each Ecuadorian public entity buys and from whom, built from SERCOP open contracting data (OCDS).",
+  "description": "Ecuador Abierto: open data about Ecuador for people and agents. First module: public procurement (SERCOP OCDS) — what each public entity buys and from whom.",
   "type": "module",
   "scripts": {
     "data": "node scripts/build-data.mjs",
@@ -25,11 +25,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/davo20019/ecuador-gasto.git"
+    "url": "https://github.com/davo20019/ecuadorabierto.git"
   },
-  "homepage": "https://ecuador-gasto.davo20019.workers.dev",
+  "homepage": "https://ecuadorabierto.com",
   "bugs": {
-    "url": "https://github.com/davo20019/ecuador-gasto/issues"
+    "url": "https://github.com/davo20019/ecuadorabierto/issues"
   },
   "engines": {
     "node": ">=22"

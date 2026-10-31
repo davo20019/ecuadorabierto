@@ -1,12 +1,14 @@
-# Ecuador Gasto
-Public Ecuador procurement awards from SERCOP. Independent project.
+# Ecuador Abierto
+Open data about Ecuador, organized in modules. Independent project, not an official source.
 
-- MCP endpoint: https://ecuador-gasto.davo20019.workers.dev/mcp
+- MCP endpoint: https://ecuadorabierto.com/mcp
 - Transport: stateless Streamable HTTP, no authentication, read-only.
-- Documentation: https://ecuador-gasto.davo20019.workers.dev/developers
-- Metadata: https://ecuador-gasto.davo20019.workers.dev/api/meta
+- Documentation: https://ecuadorabierto.com/developers
 
-Tools: get_dataset_info, search_entities (query, kind, province, limit, offset), get_entity (ruc), list_provinces (local_only).
-Resource: ecuador-gasto://dataset/info
+## Module: compras (public procurement awards from SERCOP)
+- Website: https://ecuadorabierto.com/compras/
+- Metadata: https://ecuadorabierto.com/api/compras/meta
+- Tools: compras_get_dataset_info, compras_search_entities (query, kind, province, limit, offset), compras_get_entity (ruc), compras_list_provinces (local_only).
+- Resource: ecuador-abierto://compras/dataset/info
 
 Check metadata for coverage and generation date. Data is a static snapshot of awards, not live data, actual payments or total budgets. Province is inferred from buyer RUC and may reflect historical boundaries/headquarters. Signals are not evidence of wrongdoing. Supplier identifiers are omitted. Cite SERCOP and CC BY 3.0 EC.

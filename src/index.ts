@@ -1,6 +1,7 @@
 import { handleMcp } from "./mcp";
-// Worker for the "¿En qué se gasta?" prototype.
-// Static files (HTML + prebuilt JSON) are served by Workers Static Assets.
+// Worker for Ecuador Abierto. Each data module (today: compras) lives under
+// /<module>/ for the website, /data/<module>/ for prebuilt JSON and
+// /api/<module>/ for REST. Static files are served by Workers Static Assets;
 // REST and MCP read the same prebuilt JSON through the ASSETS binding.
 
 type BuyerRow = {
@@ -39,20 +40,24 @@ async function asset<T>(
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
-    const p = url.pathname;
+    // Pre-module API paths (/api/meta, /api/buyers…) keep working as compras.
+    const p = url.pathname.replace(
+      /^\/api\/(?=meta$|buyers(\/|$)|provinces$)/,
+      "/api/compras/",
+    );
 
     if (p === "/mcp" || p === "/mcp/") return handleMcp(req, env);
 
     if (req.method !== "GET") return json({ error: "method not allowed" }, 405);
 
-    // GET /api/meta
-    if (p === "/api/meta")
-      return json(await asset(env, req, "/data/meta.json"));
+    // GET /api/compras/meta
+    if (p === "/api/compras/meta")
+      return json(await asset(env, req, "/data/compras/meta.json"));
 
-    // GET /api/buyers?q=cuenca&kind=municipio&province=Azuay&limit=20
-    if (p === "/api/buyers") {
+    // GET /api/compras/buyers?q=cuenca&kind=municipio&province=Azuay&limit=20
+    if (p === "/api/compras/buyers") {
       const rows =
-        (await asset<BuyerRow[]>(env, req, "/data/buyers.json")) ?? [];
+        (await asset<BuyerRow[]>(env, req, "/data/compras/buyers.json")) ?? [];
       const q = fold(url.searchParams.get("q") ?? "");
       const kind = url.searchParams.get("kind");
       const province = url.searchParams.get("province");
@@ -70,16 +75,16 @@ export default {
       return json({ total: out.length, results: out.slice(0, limit) });
     }
 
-    // GET /api/buyers/:ruc
-    const m = p.match(/^\/api\/buyers\/(\d{13})$/);
+    // GET /api/compras/buyers/:ruc
+    const m = p.match(/^\/api\/compras\/buyers\/(\d{13})$/);
     if (m) {
-      const detail = await asset(env, req, `/data/b/${m[1]}.json`);
+      const detail = await asset(env, req, `/data/compras/b/${m[1]}.json`);
       return detail ? json(detail) : json({ error: "not found" }, 404);
     }
 
-    // GET /api/provinces
-    if (p === "/api/provinces")
-      return json(await asset(env, req, "/data/provinces.json"));
+    // GET /api/compras/provinces
+    if (p === "/api/compras/provinces")
+      return json(await asset(env, req, "/data/compras/provinces.json"));
 
     if (p.startsWith("/api/")) return json({ error: "not found" }, 404);
     return env.ASSETS.fetch(req);

@@ -1,11 +1,18 @@
 {
-  // Cloudflare Worker for the "¿En qué se gasta?" prototype.
+  // Cloudflare Worker for Ecuador Abierto.
   // Static data (built by `npm run data`) is served from ./public via Workers Static Assets;
-  // the Worker answers /api/* and lets everything else fall through to the assets.
+  // the Worker answers /api/* and /mcp and lets everything else fall through to the assets.
+  // The name stays "ecuador-gasto" so the existing workers.dev URL (and MCP clients
+  // configured with it) keeps working alongside the custom domain. www and the .org
+  // domains redirect to ecuadorabierto.com with Cloudflare Redirect Rules (see README).
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ecuador-gasto",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
+  "routes": [
+    { "pattern": "ecuadorabierto.com", "custom_domain": true },
+  ],
+  "workers_dev": true,
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

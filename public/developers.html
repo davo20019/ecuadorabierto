@@ -3,32 +3,32 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>MCP y API · Ecuador Gasto</title>
+    <title>MCP y API · Ecuador Abierto</title>
     <meta
       name="description"
-      content="Conecta agentes a las compras públicas del Ecuador con MCP. Endpoint público, herramientas de consulta y datos del SERCOP."
+      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público y herramientas de consulta, empezando por las compras públicas del SERCOP."
     />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <nav class="topbar wrap">
       <a class="wordmark" href="/"
-        ><span class="mark">↗</span> Ecuador / Gasto público</a
-      ><a href="/">← Explorar</a>
+        ><span class="mark">↗</span> Ecuador Abierto</a
+      ><a href="/compras/">← Compras públicas</a>
     </nav>
     <main class="wrap docs">
       <div class="eyebrow">DATOS ABIERTOS / PARA DESARROLLADORES</div>
       <h1>Datos públicos.<br /><em>Listos para tus agentes.</em></h1>
       <p class="intro">
-        Consulta entidades, proveedores y montos adjudicados desde cualquier
-        cliente compatible con MCP remoto.
+        Un solo servidor MCP para todos los módulos de Ecuador Abierto. Hoy:
+        entidades, proveedores y montos adjudicados en compras públicas.
       </p>
       <section class="card">
         <h2>Conecta por MCP</h2>
         <p>
           Agrega un servidor remoto en tu cliente MCP y pega esta dirección:
         </p>
-        <pre id="endpoint">https://ecuador-gasto.davo20019.workers.dev/mcp</pre>
+        <pre id="endpoint">https://ecuadorabierto.com/mcp</pre>
         <button class="button" id="copy">Copiar dirección</button
         ><span id="copy-status" role="status"></span>
         <p class="muted">
@@ -43,9 +43,9 @@
         <pre>
 {
   "mcpServers": {
-    "ecuador-gasto": {
+    "ecuador-abierto": {
       "type": "http",
-      "url": "https://ecuador-gasto.davo20019.workers.dev/mcp"
+      "url": "https://ecuadorabierto.com/mcp"
     }
   }
 }</pre>
@@ -55,7 +55,7 @@
         </p>
       </section>
       <section class="card">
-        <h2>Cuatro herramientas, una fuente</h2>
+        <h2>Compras públicas: cuatro herramientas</h2>
         <div class="table-scroll">
           <table>
             <thead>
@@ -66,13 +66,13 @@
             </thead>
             <tbody>
               <tr>
-                <td><code>get_dataset_info</code></td>
+                <td><code>compras_get_dataset_info</code></td>
                 <td>
                   Periodo disponible, fecha de actualización, fuente y licencia.
                 </td>
               </tr>
               <tr>
-                <td><code>search_entities</code></td>
+                <td><code>compras_search_entities</code></td>
                 <td>
                   Busca por <code>query</code>, <code>province</code> y
                   <code>kind</code>. Paginación con <code>limit</code> (1–100) y
@@ -80,14 +80,14 @@
                 </td>
               </tr>
               <tr>
-                <td><code>get_entity</code></td>
+                <td><code>compras_get_entity</code></td>
                 <td>
                   Usa el <code>ruc</code> de una entidad: compras por mes,
                   principales proveedores, adjudicaciones y señales de revisión.
                 </td>
               </tr>
               <tr>
-                <td><code>list_provinces</code></td>
+                <td><code>compras_list_provinces</code></td>
                 <td>
                   Ranking provincial. <code>local_only</code> es verdadero por
                   defecto; falso incluye todas las entidades.
@@ -98,8 +98,9 @@
         </div>
         <p class="muted">
           Tipos: municipio, prefectura, parroquia, empresa, otro. Recurso MCP:
-          <code>ecuador-gasto://dataset/info</code>. Cada resultado incluye
-          metadatos y límites de interpretación.
+          <code>ecuador-abierto://compras/dataset/info</code>. Cada resultado
+          incluye metadatos y límites de interpretación. Las herramientas de
+          cada módulo llevan su prefijo (<code>compras_</code>, …).
         </p>
       </section>
       <section class="card">
@@ -117,16 +118,20 @@
         <h2>También hay una API JSON</h2>
         <ul>
           <li>
-            <a href="/api/meta"><code>GET /api/meta</code></a>
+            <a href="/api/compras/meta"><code>GET /api/compras/meta</code></a>
           </li>
           <li>
-            <a href="/api/buyers?q=cuenca&amp;kind=municipio"
-              ><code>GET /api/buyers?q=cuenca&amp;kind=municipio</code></a
+            <a href="/api/compras/buyers?q=cuenca&amp;kind=municipio"
+              ><code
+                >GET /api/compras/buyers?q=cuenca&amp;kind=municipio</code
+              ></a
             >
           </li>
-          <li><code>GET /api/buyers/:ruc</code></li>
+          <li><code>GET /api/compras/buyers/:ruc</code></li>
           <li>
-            <a href="/api/provinces"><code>GET /api/provinces</code></a>
+            <a href="/api/compras/provinces"
+              ><code>GET /api/compras/provinces</code></a
+            >
           </li>
         </ul>
       </section>
@@ -157,8 +162,8 @@
       </section>
     </main>
     <footer class="wrap">
-      Ecuador / Gasto público · Un proyecto independiente para entender las
-      compras públicas.
+      Ecuador Abierto · Un proyecto independiente para entender los datos
+      públicos del Ecuador.
     </footer>
     <script>
       document.getElementById("copy").onclick = async () => {

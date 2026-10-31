@@ -1,8 +1,22 @@
-# Ecuador Gasto · ¿En qué se gasta?
+# Ecuador Abierto
 
-An open-source explorer of Ecuador's public procurement: what public entities buy, who supplies it, and how much is awarded. Built from SERCOP's Open Contracting Data Standard (OCDS) bulk files, with a Spanish-language website, JSON API, and public read-only MCP server for agents.
+Open data about Ecuador, organized in modules, with a Spanish-language website, JSON API, and one public read-only MCP server for agents.
 
-**[Live website](https://ecuador-gasto.davo20019.workers.dev)** · **[MCP connection guide](https://ecuador-gasto.davo20019.workers.dev/developers)**
+The first module, **Compras públicas**, explores Ecuador's public procurement: what public entities buy, who supplies it, and how much is awarded. It is built from SERCOP's Open Contracting Data Standard (OCDS) bulk files. Planned modules: budget execution, National Assembly, elections, and INEC indicators.
+
+**[Live website](https://ecuadorabierto.com)** · **[MCP connection guide](https://ecuadorabierto.com/developers)**
+
+## Modules
+
+Each module uses the same layout, so adding one means adding a data script, a page, and a set of prefixed tools:
+
+| Piece        | Path                           | Compras example                          |
+| ------------ | ------------------------------ | ---------------------------------------- |
+| Website      | `public/<module>/`             | `/compras/`                              |
+| Data         | `public/data/<module>/`        | `/data/compras/buyers.json`              |
+| REST API     | `/api/<module>/…`              | `/api/compras/buyers?q=cuenca`           |
+| MCP tools    | `<module>_<tool>`              | `compras_search_entities`                |
+| MCP resource | `ecuador-abierto://<module>/…` | `ecuador-abierto://compras/dataset/info` |
 
 ## Features
 
@@ -17,8 +31,8 @@ An open-source explorer of Ecuador's public procurement: what public entities bu
 Requires Node.js 22 or newer and npm. No Cloudflare account is needed for local development.
 
 ```bash
-git clone https://github.com/davo20019/ecuador-gasto.git
-cd ecuador-gasto
+git clone https://github.com/davo20019/ecuadorabierto.git
+cd ecuadorabierto
 npm ci --legacy-peer-deps
 
 # Generate the dataset from SERCOP before opening the app.
@@ -28,7 +42,7 @@ npm run dev
 
 Open the address printed by Wrangler (usually `http://localhost:8787`). If that port is occupied, use `npm run dev -- --port 8799`.
 
-**Generated data is not committed.** The website and query tools need `public/data/` to be generated first. Downloading and processing multiple months can take several minutes and requires access to SERCOP's servers. They sometimes return 503; the script retries and caches downloads in `.cache/` for 12 hours. A failed download exits with an error. Source records may change, so rebuilding a historical period may produce different totals.
+**Generated data is not committed.** The website and query tools need `public/data/compras/` to be generated first. Downloading and processing multiple months can take several minutes and requires access to SERCOP's servers. They sometimes return 503; the script retries and caches downloads in `.cache/` for 12 hours. A failed download exits with an error. Source records may change, so rebuilding a historical period may produce different totals.
 
 ```bash
 npm run data                         # current year through the current month
@@ -36,7 +50,7 @@ npm run data -- --year 2025          # full past year
 npm run data -- --year 2026 --months 1-3
 ```
 
-A successful build replaces the previous `public/data/` snapshot. The app serves one snapshot at a time, not multiple selectable years.
+A successful build replaces the previous `public/data/compras/` snapshot. The app serves one snapshot at a time, not multiple selectable years.
 
 ## Validate
 
@@ -61,42 +75,50 @@ npx wrangler login
 npm run deploy
 ```
 
-Wrangler publishes to `https://ecuador-gasto.<your-subdomain>.workers.dev`. Set a different Worker name in `wrangler.jsonc` if needed. For a fork, replace the example endpoint URLs in `public/developers.html` and `public/llms.txt` with your deployed URL.
+Wrangler publishes to `https://ecuador-gasto.<your-subdomain>.workers.dev` and to the custom domain in `wrangler.jsonc` (`ecuadorabierto.com`). The Worker keeps the name `ecuador-gasto` so its original workers.dev URL keeps working for existing MCP clients. For a fork, remove the `routes` entry or set your own domain, and replace the endpoint URLs in `public/developers.html` and `public/llms.txt`.
+
+### Domain setup
+
+The custom-domain route requires the `ecuadorabierto.com` zone to be active in the same Cloudflare account; Wrangler creates the DNS record and certificate on deploy. `www.ecuadorabierto.com` and `ecuadorabierto.org` (apex and `www`) are not served by the Worker: give each a proxied placeholder DNS record (`A 192.0.2.1`) and a Redirect Rule that sends `301` to `https://ecuadorabierto.com` with the original path and query.
 
 Authentication is handled by Wrangler outside the repository. Do not commit credentials, `.env` files, or `.dev.vars` files.
 
 ## Remote MCP
 
-Endpoint: **`https://ecuador-gasto.davo20019.workers.dev/mcp`**
+Endpoint: **`https://ecuadorabierto.com/mcp`** (the original `https://ecuador-gasto.davo20019.workers.dev/mcp` still works)
 
-Transport: **Streamable HTTP**. Public access, read-only, no token required. Add the URL as a remote MCP server in a compatible client. Configuration formats vary by client; see the [connection guide](https://ecuador-gasto.davo20019.workers.dev/developers).
+Transport: **Streamable HTTP**. Public access, read-only, no token required. Add the URL as a remote MCP server in a compatible client. Configuration formats vary by client; see the [connection guide](https://ecuadorabierto.com/developers).
 
-| Tool               | Purpose                                                                               |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| `get_dataset_info` | Coverage period, update time, source, license, and totals                             |
-| `search_entities`  | Search by `query`, `province`, and `kind`; paginate with `limit` (1–100) and `offset` |
-| `get_entity`       | Monthly amounts, suppliers, largest awards, and signals for a 13-digit buyer `ruc`    |
-| `list_provinces`   | Province rankings; `local_only` defaults to true                                      |
+| Tool                       | Purpose                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| `compras_get_dataset_info` | Coverage period, update time, source, license, and totals                             |
+| `compras_search_entities`  | Search by `query`, `province`, and `kind`; paginate with `limit` (1–100) and `offset` |
+| `compras_get_entity`       | Monthly amounts, suppliers, largest awards, and signals for a 13-digit buyer `ruc`    |
+| `compras_list_provinces`   | Province rankings; `local_only` defaults to true                                      |
 
 Entity types: `municipio`, `prefectura`, `parroquia`, `empresa`, `otro`.
 
-Resource: `ecuador-gasto://dataset/info`. Every tool result includes provenance and interpretation caveats. The server uses the official MCP TypeScript SDK with stateless JSON responses. POST handles protocol requests, OPTIONS supports browser clients, and GET returns 405 because there is no server-initiated SSE stream. Request bodies are limited to 64 KiB.
+Resource: `ecuador-abierto://compras/dataset/info`. Every tool result includes provenance and interpretation caveats. The server uses the official MCP TypeScript SDK with stateless JSON responses. POST handles protocol requests, OPTIONS supports browser clients, and GET returns 405 because there is no server-initiated SSE stream. Request bodies are limited to 64 KiB.
 
 Example question: “Find Cuenca's municipality, check the available period, and summarize its three largest suppliers with source attribution.”
 
 ## JSON API
 
-- `GET /api/meta`
-- `GET /api/buyers?q=cuenca&kind=municipio&province=Azuay&limit=20`
-- `GET /api/buyers/:ruc`
-- `GET /api/provinces`
+- `GET /api/compras/meta`
+- `GET /api/compras/buyers?q=cuenca&kind=municipio&province=Azuay&limit=20`
+- `GET /api/compras/buyers/:ruc`
+- `GET /api/compras/provinces`
+
+The pre-module paths (`/api/meta`, `/api/buyers`, `/api/provinces`) remain as aliases of the compras endpoints.
 
 ## Project layout
 
-- `public/` — website, styles, developer guide, and agent discovery notes
+- `public/index.html` — Ecuador Abierto home page listing the modules
+- `public/compras/` — public procurement explorer
+- `public/` — shared styles, developer guide, and agent discovery notes
 - `src/index.ts` — Worker routing and REST API
 - `src/mcp.ts` — MCP tools, resource, and transport
-- `scripts/build-data.mjs` — SERCOP download and aggregation pipeline
+- `scripts/build-data.mjs` — SERCOP download and aggregation pipeline for the compras module
 - `scripts/test-mcp.mjs` — MCP integration checks
 - `wrangler.jsonc` — Worker and static-asset configuration
 

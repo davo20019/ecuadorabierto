@@ -4,7 +4,7 @@
 //   node scripts/build-data.mjs --year 2025     # a full past year
 //   node scripts/build-data.mjs --year 2026 --months 1-9
 //
-// Output (public/data/):
+// Output (public/data/compras/):
 //   meta.json           period covered, totals, generated date, source + license
 //   buyers.json         one row per buying entity (search index + ranking)
 //   provinces.json      totals per province (from the province code in the entity's RUC)
@@ -23,7 +23,7 @@ const ROOT = path.resolve(
   "..",
 );
 const CACHE = path.join(ROOT, ".cache");
-const OUT = path.join(ROOT, "public", "data");
+const OUT = path.join(ROOT, "public", "data", "compras");
 const BULK = "https://datosabiertos.compraspublicas.gob.ec/PLATAFORMA/download";
 
 // ---------- args ----------

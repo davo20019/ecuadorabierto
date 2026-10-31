@@ -3,7 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { z } from "zod";
 
 const caveats =
-  "SERCOP procurement awards only; not total budgets or actual payments. Province is inferred from buyer RUC and may reflect historical boundaries or headquarters. Review signals are not evidence of wrongdoing. Supplier identifiers are omitted. This is a static snapshot; check metadata for coverage and refresh date.";
+  "Ecuador Abierto, compras module (tools prefixed compras_). SERCOP procurement awards only; not total budgets or actual payments. Province is inferred from buyer RUC and may reflect historical boundaries or headquarters. Review signals are not evidence of wrongdoing. Supplier identifiers are omitted. This is a static snapshot; check metadata for coverage and refresh date.";
 const annotations = {
   readOnlyHint: true,
   destructiveHint: false,
@@ -60,7 +60,7 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
   const result = async (data: unknown) => {
     const structuredContent = {
       data,
-      metadata: await read("/data/meta.json"),
+      metadata: await read("/data/compras/meta.json"),
       caveats,
     };
     return {
@@ -71,23 +71,23 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
     };
   };
   const server = new McpServer(
-    { name: "ecuador-gasto", version: "1.0.0" },
+    { name: "ecuador-abierto", version: "2.0.0" },
     { instructions: caveats },
   );
   server.registerTool(
-    "get_dataset_info",
+    "compras_get_dataset_info",
     {
       description:
         "Get coverage dates, update time, source, license, totals and limitations. Check before interpreting procurement data.",
       annotations,
     },
-    async () => result(await read("/data/meta.json")),
+    async () => result(await read("/data/compras/meta.json")),
   );
   server.registerTool(
-    "search_entities",
+    "compras_search_entities",
     {
       description:
-        "Search Ecuador public buyers by name, province or entity type. Accent-insensitive. Sorted by awarded amount descending. Paginated; use the returned RUC with get_entity.",
+        "Search Ecuador public buyers by name, province or entity type. Accent-insensitive. Sorted by awarded amount descending. Paginated; use the returned RUC with compras_get_entity.",
       annotations,
       inputSchema: {
         query: z.string().max(200).default(""),
@@ -101,7 +101,7 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
     },
     async ({ query, province, kind, limit, offset }) => {
       const terms = fold(query).split(/\s+/).filter(Boolean);
-      const rows = (await read<Buyer[]>("/data/buyers.json"))
+      const rows = (await read<Buyer[]>("/data/compras/buyers.json"))
         .filter(
           (b) =>
             (!province || fold(b.province) === fold(province)) &&
@@ -119,7 +119,7 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
     },
   );
   server.registerTool(
-    "get_entity",
+    "compras_get_entity",
     {
       description:
         "Get a public buyer by its 13-digit RUC: monthly award amounts, top suppliers, largest awards and review signals. Includes a link to the entity page. Supplier IDs are excluded.",
@@ -128,12 +128,12 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
     },
     async ({ ruc }) =>
       result({
-        entity: await read(`/data/b/${ruc}.json`),
-        url: new URL(`/#/e/${ruc}`, request.url).href,
+        entity: await read(`/data/compras/b/${ruc}.json`),
+        url: new URL(`/compras/#/e/${ruc}`, request.url).href,
       }),
   );
   server.registerTool(
-    "list_provinces",
+    "compras_list_provinces",
     {
       description:
         "Rank provinces by awarded amount. local_only defaults to true and includes municipalities, prefectures, parishes and public companies. False includes central government and other entities. Amounts are USD.",
@@ -141,7 +141,7 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
       inputSchema: { local_only: z.boolean().default(true) },
     },
     async ({ local_only }) => {
-      const rows = (await read<Province[]>("/data/provinces.json"))
+      const rows = (await read<Province[]>("/data/compras/provinces.json"))
         .map((p) => ({
           ...p,
           rankedAmount: local_only
@@ -156,8 +156,8 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
     },
   );
   server.registerResource(
-    "dataset-info",
-    "ecuador-gasto://dataset/info",
+    "compras-dataset-info",
+    "ecuador-abierto://compras/dataset/info",
     {
       description: "Dataset provenance, coverage and interpretation limits",
       mimeType: "application/json",
@@ -168,7 +168,7 @@ export async function handleMcp(request: Request, env: Env): Promise<Response> {
           uri: uri.href,
           mimeType: "application/json",
           text: JSON.stringify({
-            metadata: await read("/data/meta.json"),
+            metadata: await read("/data/compras/meta.json"),
             caveats,
           }),
         },

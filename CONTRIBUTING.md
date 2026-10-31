@@ -1,6 +1,8 @@
 # Contributing
 
-Thank you for helping make Ecuador's public procurement easier to understand.
+Thank you for helping make Ecuador's public data easier to understand.
+
+New modules follow the layout in the README: a page under `public/<module>/`, data under `public/data/<module>/`, REST under `/api/<module>/`, and MCP tools prefixed `<module>_`. Open an issue to discuss the source and its license before building one.
 
 1. Open an issue describing a bug or proposed improvement. For data discrepancies, include the public SERCOP process link and dataset period.
 2. Fork the repository and create a branch for your change.

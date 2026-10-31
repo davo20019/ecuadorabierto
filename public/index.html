@@ -3,23 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>¿En qué se gasta? Compras públicas del Ecuador</title>
+    <title>Ecuador Abierto · Datos públicos del Ecuador</title>
     <meta
       name="description"
-      content="Qué compra cada municipio, prefectura y entidad pública del Ecuador, y a quién. Datos abiertos del SERCOP."
+      content="Datos públicos del Ecuador, claros y verificables, para personas y agentes. Empieza por las compras públicas del SERCOP."
     />
     <link rel="stylesheet" href="/styles.css" />
+    <script>
+      // Entity links from before the modules moved under /compras/.
+      const legacy = () => {
+        if (/^#\/e\/\d{13}$/.test(location.hash))
+          location.replace("/compras/" + location.hash);
+      };
+      legacy();
+      addEventListener("hashchange", legacy);
+    </script>
   </head>
   <body>
-    <a class="skip" href="#explorer">Saltar al explorador</a>
+    <a class="skip" href="#modulos">Saltar a los módulos</a>
     <nav class="topbar wrap">
-      <a class="wordmark" href="/">
-        <span class="mark">↗</span> Ecuador<span class="wordmark-light">
-          / Gasto público</span
-        ></a
+      <a class="wordmark" href="/"
+        ><span class="mark">↗</span> Ecuador Abierto</a
       >
       <div>
-        <a href="/#explorer">Explorar</a
+        <a href="/compras/">Compras públicas</a
         ><a href="/developers"
           >Para agentes <span aria-hidden="true">↗</span></a
         >
@@ -30,64 +37,59 @@
         <div class="eyebrow">
           <span class="live-dot"></span> DATOS ABIERTOS · ECUADOR
         </div>
-        <h1>El dinero público.<br /><em>A la vista de todos.</em></h1>
+        <h1>Lo público.<br /><em>A la vista de todos.</em></h1>
         <p class="intro">
-          Explora qué compra tu municipio, quién lo provee y cuánto se adjudica.
-          Las compras públicas, más claras.
+          Datos oficiales del Ecuador, ordenados para que cualquiera pueda
+          entenderlos, verificarlos y usarlos. Siempre con la fuente.
         </p>
-        <a class="hero-link" href="#explorer"
-          >Empieza por tu ciudad <span>↓</span></a
+        <a class="hero-link" href="#modulos"
+          >Explora los módulos <span>↓</span></a
         >
-        <div class="kpis" id="kpis"></div>
       </div>
     </header>
 
     <main class="wrap">
-      <section id="home" class="dashboard">
-        <div class="card explorer" id="explorer">
-          <div class="eyebrow">01 / EXPLORA LAS ENTIDADES</div>
-          <h2>Sigue el dinero de tu ciudad</h2>
+      <section class="modules" id="modulos" aria-label="Módulos">
+        <a class="card module" href="/compras/">
+          <div class="eyebrow">01 / DISPONIBLE</div>
+          <h2>Compras públicas</h2>
           <p class="muted">
-            Busca una entidad y conoce sus compras y proveedores.
+            Qué compra cada municipio, prefectura y entidad pública, a quién y
+            por cuánto. Fuente: SERCOP.
           </p>
-          <div class="search">
-            <input
-              id="q"
-              type="search"
-              placeholder="Ej.: Cuenca, Portoviejo, Ministerio de Salud"
-              autocomplete="off"
-              aria-label="Buscar entidad"
-            />
-          </div>
-          <div class="chips" id="kinds"></div>
-          <div class="result-toolbar">
-            <span id="result-count" role="status"></span
-            ><label
-              >Ordenar
-              <select id="sort">
-                <option value="amount">Mayor monto</option>
-                <option value="name">Nombre A–Z</option>
-              </select></label
-            >
-          </div>
-          <ul class="results" id="results"></ul>
-          <button class="more" id="more" hidden>Ver más entidades ↓</button>
+          <p class="module-stat" id="compras-stat"></p>
+          <span class="module-go">Explorar ↗</span>
+        </a>
+        <div class="card module soon">
+          <div class="eyebrow">02 / PRÓXIMAMENTE</div>
+          <h2>Presupuesto</h2>
+          <p class="muted">
+            Cuánto se asigna y cuánto se ejecuta realmente, entidad por entidad.
+            Fuente: Ministerio de Economía y Finanzas.
+          </p>
         </div>
-        <aside class="card province-card">
-          <div class="eyebrow">02 / EL TERRITORIO</div>
-          <h2>Provincia por provincia</h2>
+        <div class="card module soon">
+          <div class="eyebrow">03 / PRÓXIMAMENTE</div>
+          <h2>Asamblea</h2>
           <p class="muted">
-            Municipios, prefecturas, juntas parroquiales y sus empresas
-            públicas. Toca una provincia para ver sus entidades.
+            Cómo vota cada asambleísta y qué proyectos de ley impulsa.
           </p>
-          <div class="bars" id="provinces"></div>
-          <div class="province-note">
-            La provincia se infiere del RUC y puede reflejar límites históricos.
-          </div>
-        </aside>
+        </div>
+        <div class="card module soon">
+          <div class="eyebrow">04 / PRÓXIMAMENTE</div>
+          <h2>Elecciones</h2>
+          <p class="muted">
+            Resultados y financiamiento de campañas. Fuente: CNE.
+          </p>
+        </div>
+        <div class="card module soon">
+          <div class="eyebrow">05 / PRÓXIMAMENTE</div>
+          <h2>Indicadores</h2>
+          <p class="muted">
+            Pobreza, empleo y precios por provincia. Fuente: INEC.
+          </p>
+        </div>
       </section>
-
-      <section id="entity" class="hidden"></section>
     </main>
 
     <section class="agent-strip wrap">
@@ -98,264 +100,30 @@
       </div>
       <a class="button" href="/developers">Conectar un agente ↗</a>
     </section>
-    <footer class="wrap" id="foot"></footer>
+    <footer class="wrap">
+      <p>
+        Ecuador Abierto es un proyecto independiente y de código abierto; no es
+        una fuente oficial. Cada módulo cita su fuente y su licencia.
+        <a href="https://github.com/davo20019/ecuadorabierto" rel="noopener"
+          >Código en GitHub</a
+        >.
+      </p>
+    </footer>
 
     <script>
-      const KINDS = {
-        municipio: "Municipios",
-        prefectura: "Prefecturas",
-        parroquia: "Juntas parroquiales",
-        empresa: "Empresas públicas",
-        otro: "Gobierno central y otras",
-      };
-      const LOCAL = ["municipio", "prefectura", "parroquia", "empresa"];
-      const MONTHS = [
-        "Ene",
-        "Feb",
-        "Mar",
-        "Abr",
-        "May",
-        "Jun",
-        "Jul",
-        "Ago",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dic",
-      ];
-      const usd = (n, compact) =>
-        new Intl.NumberFormat("es-EC", {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-          notation: compact ? "compact" : "standard",
-        }).format(n);
-      const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-      const esc = (s) =>
-        String(s).replace(
-          /[&<>"']/g,
-          (c) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;",
-            })[c],
-        );
-      // Names arrive in capitals; title-case them for reading, keep short words lower.
-      const nice = (s) =>
-        s
-          .toLowerCase()
-          .replace(/(^|\s|\()(\p{L})/gu, (m, a, b) => a + b.toUpperCase())
-          .replace(/\b(De|Del|La|Las|Los|Y|E|En|Para|Por)\b/g, (w) =>
-            w.toLowerCase(),
-          )
-          .replace(/\b(Ep|Gad|Cia|Ltda|S\.a|Iess)\b\.?/gi, (w) =>
-            w.toUpperCase(),
-          );
-
-      let visibleCount = 15;
-      let meta,
-        buyers = [],
-        provinces = [],
-        kind = "municipio",
-        province = null;
-
-      async function load() {
-        [meta, buyers, provinces] = await Promise.all(
-          ["meta", "buyers", "provinces"].map((f) =>
-            fetch(`/data/${f}.json`).then((r) => r.json()),
-          ),
-        );
-        const period = `${MONTHS[meta.months[0] - 1]}–${MONTHS[meta.months.at(-1) - 1]} ${meta.year}`;
-        document.getElementById("kpis").innerHTML = `
-    <div class="kpi"><b>${usd(meta.total, true)}</b><span>adjudicado, ${period}</span></div>
-    <div class="kpi"><b>${meta.awards.toLocaleString("es-EC")}</b><span>adjudicaciones</span></div>
-    <div class="kpi"><b>${meta.entities.toLocaleString("es-EC")}</b><span>entidades compradoras</span></div>`;
-        document.getElementById("foot").innerHTML = `
-    <p><b>Fuente:</b> <a href="${meta.sourceUrl}" rel="noopener">${meta.source}</a>, licencia <a href="${meta.licenseUrl}" rel="noopener">${meta.license}</a>. Datos procesados el ${new Date(meta.generated).toLocaleDateString("es-EC")}.</p>
-    <p>Este sitio es independiente y no es una fuente oficial. Muestra <b>compras públicas</b> (bienes, obras y servicios contratados); no incluye sueldos, pensiones, deuda ni transferencias entre entidades. La provincia se toma del RUC de la entidad, por eso las instituciones nacionales aparecen en Pichincha.</p>
-    <p>Las señales marcadas son patrones que vale la pena revisar, no pruebas de irregularidad. Revisa siempre el proceso original en el SERCOP.</p>`;
-        renderKinds();
-        renderProvinces();
-        renderResults();
-        route();
-      }
-
-      function renderKinds() {
-        const el = document.getElementById("kinds");
-        el.innerHTML =
-          Object.entries({
-            ...KINDS,
-            ...(kind === "local" ? { local: "Gobiernos locales" } : {}),
-            all: "Todas",
-          })
-            .map(
-              ([k, v]) =>
-                `<button class="chip" data-k="${k}" aria-pressed="${k === kind}">${v}</button>`,
-            )
-            .join("") +
-          (province
-            ? `<button class="chip" data-clear aria-pressed="true">${esc(province)} ✕</button>`
-            : "");
-        el.onclick = (e) => {
-          const b = e.target.closest("button");
-          if (!b) return;
-          if (b.dataset.clear !== undefined) province = null;
-          else kind = b.dataset.k;
-          visibleCount = 15;
-          renderKinds();
-          renderResults();
-        };
-      }
-
-      function renderResults() {
-        const terms = fold(document.getElementById("q").value)
-          .split(/\s+/)
-          .filter(Boolean);
-        const list = buyers.filter(
-          (b) =>
-            (kind === "all" ||
-              (kind === "local" ? LOCAL.includes(b.kind) : b.kind === kind)) &&
-            (!province || b.province === province) &&
-            terms.every((t) => fold(b.name).includes(t)),
-        );
-        list.sort(
-          document.getElementById("sort").value === "name"
-            ? (a, b) => a.name.localeCompare(b.name, "es")
-            : (a, b) => b.total - a.total,
-        );
-        const shown = list.slice(0, visibleCount);
-        document.getElementById("result-count").textContent =
-          `${list.length.toLocaleString("es-EC")} ${list.length === 1 ? "entidad" : "entidades"}${province ? " en " + province : ""}`;
-        document.getElementById("more").hidden = list.length <= visibleCount;
-        document.getElementById("results").innerHTML =
-          shown
-            .map(
-              (b) => `
-    <li><a href="#/e/${b.ruc}"><span class="entity-icon" aria-hidden="true">▥</span>
-      <span class="entity-name"><span class="nm">${esc(nice(b.name))}</span><br><span class="sub">${esc(b.province)} · ${b.processes} procesos${b.signals ? " · ⚑ revisar" : ""}</span></span>
-      <span class="amt">${usd(b.total, true)} <span class="arrow" aria-hidden="true">↗</span></span></a></li>`,
-            )
-            .join("") +
-          (!list.length
-            ? `<li class="muted" style="padding:10px 4px">Sin resultados.</li>`
-            : "");
-      }
-
-      function renderProvinces() {
-        const rows = provinces
-          .map((p) => ({
-            ...p,
-            local: LOCAL.reduce((s, k) => s + (p.byKind[k] || 0), 0),
-          }))
-          .filter((p) => p.local > 0)
-          .sort((a, b) => b.local - a.local);
-        const max = rows[0]?.local || 1;
-        document.getElementById("provinces").innerHTML = rows
-          .map(
-            (p) => `
-    <div class="row"><button class="linkish lbl" data-p="${esc(p.province)}">${esc(p.province)}</button><span class="val">${usd(p.local, true)}</span>
-    <div class="track"><div class="fill" style="width:${((p.local / max) * 100).toFixed(1)}%"></div></div></div>`,
-          )
-          .join("");
-        document.getElementById("provinces").onclick = (e) => {
-          const b = e.target.closest("[data-p]");
-          if (!b) return;
-          province = b.dataset.p;
-          kind = "local";
-          document.getElementById("q").value = "";
-          visibleCount = 15;
-          renderKinds();
-          renderResults();
-          document
-            .getElementById("q")
-            .scrollIntoView({ behavior: "smooth", block: "center" });
-        };
-      }
-
-      async function showEntity(ruc) {
-        const el = document.getElementById("entity");
-        el.innerHTML = `<div class="card muted">Cargando…</div>`;
-        const r = await fetch(`/data/b/${ruc}.json`);
-        if (!r.ok) {
-          el.innerHTML = `<div class="card">No encontramos esa entidad. <a href="#/">Volver</a></div>`;
-          return;
-        }
-        const d = await r.json();
-        const maxM = Math.max(...d.monthly, 1);
-        const maxS = d.topSuppliers[0]?.amount || 1;
-        const months = meta.months;
-        el.innerHTML = `
-    <a class="back" href="#/">← Volver</a>
-    <div class="card">
-      <h2 style="font-size:1.35rem">${esc(nice(d.name))}</h2>
-      <div class="muted">${KINDS[d.kind]} · ${esc(d.province)} · ${MONTHS[months[0] - 1]}–${MONTHS[months.at(-1) - 1]} ${meta.year}</div>
-      <div class="stats">
-        <div class="stat"><b>${usd(d.total)}</b><span>adjudicado</span></div>
-        <div class="stat"><b>${d.processes}</b><span>procesos</span></div>
-        <div class="stat"><b>${d.suppliers}</b><span>proveedores</span></div>
-      </div>
-      ${d.signals.map((s) => `<div class="signal">⚑ ${esc(s.text)} Vale la pena revisarlo; no es prueba de irregularidad.</div>`).join("")}
-    </div>
-    <div class="card">
-      <h2>Monto adjudicado por mes</h2>
-      <div class="months">${months.map((m) => `<div title="${MONTHS[m - 1]}: ${usd(d.monthly[m - 1])}" style="height:${((d.monthly[m - 1] / maxM) * 100).toFixed(1)}%"></div>`).join("")}${"<span></span>".repeat(12 - months.length)}</div>
-      <div class="months-lbl">${months.map((m) => `<span>${MONTHS[m - 1]}</span>`).join("")}</div>
-    </div>
-    <div class="card">
-      <h2>¿A quién le compra?</h2>
-      <div class="bars">${d.topSuppliers
-        .map(
-          (s) => `
-        <div class="row"><span class="lbl" title="${esc(s.name)}">${esc(nice(s.name))}</span><span class="val">${usd(s.amount, true)} · ${Math.round((s.amount / d.total) * 100)}%</span>
-        <div class="track"><div class="fill" style="width:${((s.amount / maxS) * 100).toFixed(1)}%"></div></div></div>`,
-        )
-        .join("")}</div>
-    </div>
-    <div class="card">
-      <h2>Adjudicaciones más grandes</h2>
-      <div class="table-scroll"><table><thead><tr><th>Proveedor</th><th class="hide-sm">Fecha</th><th class="num">Monto</th><th></th></tr></thead><tbody>
-      ${d.largest
-        .map(
-          (
-            a,
-          ) => `<tr><td>${esc(a.suppliers.map(nice).join(", ") || "Sin dato")}</td><td class="hide-sm date">${esc(a.date)}</td><td class="num">${usd(a.amount)}</td>
-        <td><a href="https://datosabiertos.compraspublicas.gob.ec/PLATAFORMA/ocds/${encodeURIComponent(a.ocid)}" target="_blank" rel="noopener">Ver</a></td></tr>`,
-        )
-        .join("")}
-      </tbody></table></div>
-      <p class="muted">"Ver" abre el proceso en la plataforma oficial del SERCOP.</p>
-    </div>`;
-        window.scrollTo(0, 0);
-      }
-
-      function route() {
-        const m = location.hash.match(/^#\/e\/(\d{13})$/);
-        document.getElementById("home").classList.toggle("hidden", !!m);
-        document.getElementById("entity").classList.toggle("hidden", !m);
-        document.body.classList.toggle("detail-view", !!m);
-        if (m) showEntity(m[1]);
-      }
-
-      document.getElementById("q").addEventListener("input", () => {
-        visibleCount = 15;
-        renderResults();
-      });
-      document.getElementById("sort").addEventListener("change", () => {
-        visibleCount = 15;
-        renderResults();
-      });
-      document.getElementById("more").addEventListener("click", () => {
-        visibleCount += 15;
-        renderResults();
-      });
-      window.addEventListener("hashchange", route);
-      load().catch(() => {
-        document.getElementById("results").innerHTML =
-          `<li class="muted">No se pudieron cargar los datos.</li>`;
-      });
+      fetch("/data/compras/meta.json")
+        .then((r) => r.json())
+        .then((meta) => {
+          const usd = new Intl.NumberFormat("es-EC", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 0,
+            notation: "compact",
+          }).format(meta.total);
+          document.getElementById("compras-stat").textContent =
+            `${usd} adjudicados en ${meta.year} · ${meta.entities.toLocaleString("es-EC")} entidades`;
+        })
+        .catch(() => {});
     </script>
   </body>
 </html>
