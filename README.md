@@ -120,6 +120,7 @@ The pre-module paths (`/api/meta`, `/api/buyers`, `/api/provinces`) remain as al
 - `src/mcp.ts` — MCP tools, resource, and transport
 - `scripts/build-data.mjs` — SERCOP download and aggregation pipeline for the compras module
 - `scripts/test-mcp.mjs` — MCP integration checks
+- `scripts/brand/` — Open Graph card source and `render.sh`, which regenerates the favicon PNG/ICO files and `public/og*.png` (needs Chrome and ImageMagick)
 - `wrangler.jsonc` — Worker and static-asset configuration
 
 ## Data and interpretation limits

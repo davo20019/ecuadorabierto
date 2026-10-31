@@ -1,0 +1,144 @@
+<!doctype html>
+<!-- Open Graph card source, rendered to public/og*.png by scripts/brand/render.sh.
+     ?m=compras renders the Compras públicas variant. -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse at 92% 0%, #dbe6d3 0, transparent 60%),
+          #f5f4ee;
+        color: #173e34;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        padding: 64px 80px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 30px;
+        font-weight: 750;
+        letter-spacing: -0.8px;
+      }
+      .top img {
+        width: 56px;
+        height: 56px;
+      }
+      .top span {
+        font-weight: 400;
+        color: #65766c;
+        font-size: 26px;
+        letter-spacing: 0;
+      }
+      .eyebrow {
+        margin-top: 64px;
+        font-size: 17px;
+        letter-spacing: 3px;
+        font-weight: 750;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .eyebrow i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #337a5c;
+      }
+      h1 {
+        margin-top: 22px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        font-size: 104px;
+        line-height: 1.04;
+        letter-spacing: -4.5px;
+      }
+      h1 em {
+        color: #548269;
+      }
+      .foot {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 24px;
+        color: #65766c;
+      }
+      .foot b {
+        color: #154b3a;
+        font-weight: 650;
+      }
+      .tags {
+        display: flex;
+        gap: 10px;
+      }
+      .tags span {
+        border: 1.5px solid #c9d4c5;
+        border-radius: 999px;
+        padding: 8px 18px;
+        font-size: 19px;
+        color: #173e34;
+        background: #fffefa;
+      }
+      .rule {
+        position: absolute;
+        right: 80px;
+        top: 150px;
+        writing-mode: vertical-rl;
+        letter-spacing: 9px;
+        font-size: 17px;
+        color: #7e957b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <img src="../../public/favicon.svg" alt="" />Ecuador Abierto
+      <span id="module"></span>
+    </div>
+    <div class="eyebrow"><i></i><span id="eyebrow"></span></div>
+    <h1 id="title"></h1>
+    <div class="foot">
+      <div class="tags" id="tags"></div>
+      <b>ecuadorabierto.com</b>
+    </div>
+    <div class="rule">EC / 0°00′</div>
+    <script>
+      const v = {
+        home: {
+          eyebrow: "DATOS ABIERTOS · ECUADOR",
+          title: "Lo público.<br><em>A la vista de todos.</em>",
+          tags: [
+            "Compras públicas",
+            "Presupuesto",
+            "Asamblea",
+            "MCP para agentes",
+          ],
+        },
+        compras: {
+          module: "/ Compras públicas",
+          eyebrow: "DATOS DEL SERCOP · ECUADOR",
+          title: "¿Qué compra<br><em>tu municipio?</em>",
+          tags: ["Entidades", "Proveedores", "Montos adjudicados"],
+        },
+      }[new URLSearchParams(location.search).get("m") || "home"];
+      document.getElementById("module").textContent = v.module || "";
+      document.getElementById("eyebrow").textContent = v.eyebrow;
+      document.getElementById("title").innerHTML = v.title;
+      document.getElementById("tags").innerHTML = v.tags
+        .map((t) => `<span>${t}</span>`)
+        .join("");
+    </script>
+  </body>
+</html>
