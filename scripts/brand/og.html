@@ -130,20 +130,15 @@
     <script>
       const v = {
         home: {
-          eyebrow: "DATOS ABIERTOS · ECUADOR",
+          eyebrow: "INFORMACIÓN PÚBLICA · ECUADOR",
           title: "Lo público.<br><em>A la vista de todos.</em>",
-          tags: [
-            "Compras públicas",
-            "Presupuesto",
-            "Asamblea",
-            "MCP para agentes",
-          ],
+          tags: ["Compras públicas", "Presupuesto", "Asamblea", "Elecciones"],
         },
         compras: {
           module: "/ Compras públicas",
-          eyebrow: "DATOS DEL SERCOP · ECUADOR",
+          eyebrow: "DATOS OFICIALES DEL SERCOP",
           title: "¿Qué compra<br><em>tu municipio?</em>",
-          tags: ["Entidades", "Proveedores", "Montos adjudicados"],
+          tags: ["Tu municipio", "A quién le compra", "Por cuánto"],
         },
       }[new URLSearchParams(location.search).get("m") || "home"];
       document.getElementById("module").textContent = v.module || "";

@@ -6,7 +6,7 @@
     <title>Ecuador Abierto · Datos públicos del Ecuador</title>
     <meta
       name="description"
-      content="Datos públicos del Ecuador, claros y verificables, para personas y agentes. Empieza por las compras públicas del SERCOP."
+      content="Información pública del Ecuador explicada de forma sencilla, con fuentes oficiales. Empieza por ver qué compra tu municipio."
     />
     <link rel="canonical" href="https://ecuadorabierto.com/" />
     <meta name="theme-color" content="#034ea2" />
@@ -24,7 +24,7 @@
     />
     <meta
       property="og:description"
-      content="Datos públicos del Ecuador, claros y verificables, para personas y agentes. Empieza por las compras públicas del SERCOP."
+      content="Información pública del Ecuador explicada de forma sencilla, con fuentes oficiales. Empieza por ver qué compra tu municipio."
     />
     <meta property="og:image" content="https://ecuadorabierto.com/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -40,7 +40,7 @@
     />
     <meta
       name="twitter:description"
-      content="Datos públicos del Ecuador, claros y verificables, para personas y agentes. Empieza por las compras públicas del SERCOP."
+      content="Información pública del Ecuador explicada de forma sencilla, con fuentes oficiales. Empieza por ver qué compra tu municipio."
     />
     <meta name="twitter:image" content="https://ecuadorabierto.com/og.png" />
     <script type="application/ld+json">
@@ -50,7 +50,7 @@
         "name": "Ecuador Abierto",
         "url": "https://ecuadorabierto.com/",
         "inLanguage": "es-EC",
-        "description": "Datos públicos del Ecuador, claros y verificables, para personas y agentes.",
+        "description": "Información pública del Ecuador explicada de forma sencilla, con fuentes oficiales.",
         "publisher": {
           "@type": "Organization",
           "name": "Ecuador Abierto",
@@ -72,7 +72,7 @@
     </script>
   </head>
   <body>
-    <a class="skip" href="#modulos">Saltar a los módulos</a>
+    <a class="skip" href="#modulos">Ir a los temas</a>
     <nav class="topbar wrap">
       <a class="wordmark" href="/"
         ><img class="mark" src="/favicon.svg" alt="" width="32" height="32" />
@@ -81,43 +81,41 @@
       <div>
         <a href="/compras/">Compras públicas</a
         ><a href="/developers"
-          >Para agentes <span aria-hidden="true">↗</span></a
+          >Para programadores <span aria-hidden="true">↗</span></a
         >
       </div>
     </nav>
     <header>
       <div class="wrap">
         <div class="eyebrow">
-          <span class="live-dot"></span> DATOS ABIERTOS · ECUADOR
+          <span class="live-dot"></span> INFORMACIÓN PÚBLICA · ECUADOR
         </div>
         <h1>Lo público.<br /><em>A la vista de todos.</em></h1>
         <p class="intro">
-          Datos oficiales del Ecuador, ordenados para que cualquiera pueda
-          entenderlos, verificarlos y usarlos. Siempre con la fuente.
+          Información pública del Ecuador, explicada de forma sencilla. Cada
+          dato viene de una fuente oficial que puedes revisar.
         </p>
-        <a class="hero-link" href="#modulos"
-          >Explora los módulos <span>↓</span></a
-        >
+        <a class="hero-link" href="#modulos">Elige un tema <span>↓</span></a>
       </div>
     </header>
 
     <main class="wrap">
-      <section class="modules" id="modulos" aria-label="Módulos">
+      <section class="modules" id="modulos" aria-label="Temas">
         <a class="card module" href="/compras/">
           <div class="eyebrow">DISPONIBLE</div>
           <h2>Compras públicas</h2>
           <p class="muted">
-            Qué compra cada municipio, prefectura y entidad pública, a quién y
-            por cuánto. Fuente: SERCOP.
+            Qué compra tu municipio, tu prefectura o cualquier institución
+            pública, a quién le compra y por cuánto. Fuente: SERCOP.
           </p>
           <p class="module-stat" id="compras-stat"></p>
-          <span class="module-go">Explorar ↗</span>
+          <span class="module-go">Ver las compras ↗</span>
         </a>
         <div class="card module soon">
           <div class="eyebrow">PRÓXIMAMENTE</div>
           <h2>Presupuesto</h2>
           <p class="muted">
-            Cuánto se asigna y cuánto se ejecuta realmente, entidad por entidad.
+            Cuánto dinero recibe cada institución y cuánto gasta de verdad.
             Fuente: Ministerio de Economía y Finanzas.
           </p>
         </div>
@@ -132,7 +130,7 @@
           <div class="eyebrow">PRÓXIMAMENTE</div>
           <h2>Elecciones</h2>
           <p class="muted">
-            Resultados y financiamiento de campañas. Fuente: CNE.
+            Resultados y quién pagó las campañas. Fuente: CNE.
           </p>
         </div>
         <div class="card module soon">
@@ -145,14 +143,6 @@
       </section>
     </main>
 
-    <section class="agent-strip wrap">
-      <div>
-        <div class="eyebrow">DATOS QUE PUEDES USAR</div>
-        <h2>También para tus agentes.</h2>
-        <p>Conecta tu asistente a los datos públicos con MCP.</p>
-      </div>
-      <a class="button" href="/developers">Conectar un agente ↗</a>
-    </section>
     <footer class="wrap">
       <p>
         Ecuador Abierto es un proyecto independiente y de código abierto; no es
@@ -167,14 +157,9 @@
       fetch("/data/compras/meta.json")
         .then((r) => r.json())
         .then((meta) => {
-          const usd = new Intl.NumberFormat("es-EC", {
-            style: "currency",
-            currency: "USD",
-            maximumFractionDigits: 0,
-            notation: "compact",
-          }).format(meta.total);
+          const millions = Math.round(meta.total / 1e6).toLocaleString("es-EC");
           document.getElementById("compras-stat").textContent =
-            `${usd} adjudicados en ${meta.year} · ${meta.entities.toLocaleString("es-EC")} entidades`;
+            `$${millions} millones contratados en ${meta.year} por ${meta.entities.toLocaleString("es-EC")} instituciones`;
         })
         .catch(() => {});
     </script>

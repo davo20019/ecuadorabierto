@@ -320,14 +320,14 @@ async function main() {
     if (e.total >= 100_000 && sups.length >= 1 && topShare >= 0.5) {
       signals.push({
         code: "concentracion",
-        text: `Un solo proveedor concentra el ${Math.round(topShare * 100)}% del monto adjudicado.`,
+        text: `Una sola empresa o persona recibió el ${Math.round(topShare * 100)}% de todo lo que contrató esta institución.`,
       });
     }
     const repeat = sups.find((s) => s.n >= 15 && s.amount / s.n < 7_000);
     if (repeat) {
       signals.push({
         code: "repetido",
-        text: `Un proveedor recibió ${repeat.n} adjudicaciones pequeñas (promedio bajo USD 7.000).`,
+        text: `Una misma empresa o persona recibió ${repeat.n} contratos pequeños, de menos de $7.000 en promedio.`,
       });
     }
 

@@ -6,7 +6,7 @@
     <title>Compras públicas del Ecuador · Ecuador Abierto</title>
     <meta
       name="description"
-      content="Qué compra cada municipio, prefectura y entidad pública del Ecuador, y a quién. Datos abiertos del SERCOP."
+      content="Mira qué compra tu municipio, tu prefectura o cualquier institución pública del Ecuador, a quién le compra y por cuánto. Datos oficiales del SERCOP."
     />
     <link rel="canonical" href="https://ecuadorabierto.com/compras/" />
     <meta name="theme-color" content="#034ea2" />
@@ -24,7 +24,7 @@
     />
     <meta
       property="og:description"
-      content="Qué compra cada municipio, prefectura y entidad pública del Ecuador, y a quién. Datos abiertos del SERCOP."
+      content="Mira qué compra tu municipio, tu prefectura o cualquier institución pública del Ecuador, a quién le compra y por cuánto. Datos oficiales del SERCOP."
     />
     <meta
       property="og:image"
@@ -43,7 +43,7 @@
     />
     <meta
       name="twitter:description"
-      content="Qué compra cada municipio, prefectura y entidad pública del Ecuador, y a quién. Datos abiertos del SERCOP."
+      content="Mira qué compra tu municipio, tu prefectura o cualquier institución pública del Ecuador, a quién le compra y por cuánto. Datos oficiales del SERCOP."
     />
     <meta
       name="twitter:image"
@@ -89,7 +89,7 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <a class="skip" href="#explorer">Saltar al explorador</a>
+    <a class="skip" href="#explorer">Ir al buscador</a>
     <nav class="topbar wrap">
       <a class="wordmark" href="/">
         <img class="mark" src="/favicon.svg" alt="" width="32" height="32" />
@@ -98,21 +98,21 @@
         ></a
       >
       <div>
-        <a href="#explorer">Explorar</a
+        <a href="#explorer">Buscar</a
         ><a href="/developers"
-          >Para agentes <span aria-hidden="true">↗</span></a
+          >Para programadores <span aria-hidden="true">↗</span></a
         >
       </div>
     </nav>
     <header>
       <div class="wrap">
         <div class="eyebrow">
-          <span class="live-dot"></span> DATOS ABIERTOS · ECUADOR
+          <span class="live-dot"></span> DATOS OFICIALES DEL SERCOP
         </div>
         <h1>El dinero público.<br /><em>A la vista de todos.</em></h1>
         <p class="intro">
-          Explora qué compra tu municipio, quién lo provee y cuánto se adjudica.
-          Las compras públicas, más claras.
+          Mira qué compra tu municipio, a quién le compra y por cuánto. Con
+          datos oficiales del Estado.
         </p>
         <a class="hero-link" href="#explorer"
           >Empieza por tu ciudad <span>↓</span></a
@@ -124,10 +124,11 @@
     <main class="wrap">
       <section id="home" class="dashboard">
         <div class="card explorer" id="explorer">
-          <div class="eyebrow">01 / EXPLORA LAS ENTIDADES</div>
+          <div class="eyebrow">BUSCA</div>
           <h2>Sigue el dinero de tu ciudad</h2>
           <p class="muted">
-            Busca una entidad y conoce sus compras y proveedores.
+            Escribe el nombre de tu cantón, de tu prefectura o de cualquier
+            institución pública.
           </p>
           <div class="search">
             <input
@@ -135,7 +136,7 @@
               type="search"
               placeholder="Ej.: Cuenca, Portoviejo, Ministerio de Salud"
               autocomplete="off"
-              aria-label="Buscar entidad"
+              aria-label="Buscar institución"
             />
           </div>
           <div class="chips" id="kinds"></div>
@@ -144,24 +145,25 @@
             ><label
               >Ordenar
               <select id="sort">
-                <option value="amount">Mayor monto</option>
-                <option value="name">Nombre A–Z</option>
+                <option value="amount">Más dinero primero</option>
+                <option value="name">Por nombre (A–Z)</option>
               </select></label
             >
           </div>
           <ul class="results" id="results"></ul>
-          <button class="more" id="more" hidden>Ver más entidades ↓</button>
+          <button class="more" id="more" hidden>Ver más ↓</button>
         </div>
         <aside class="card province-card">
-          <div class="eyebrow">02 / EL TERRITORIO</div>
+          <div class="eyebrow">POR PROVINCIA</div>
           <h2>Provincia por provincia</h2>
           <p class="muted">
-            Municipios, prefecturas, juntas parroquiales y sus empresas
-            públicas. Toca una provincia para ver sus entidades.
+            Cuánto contrataron los municipios, prefecturas y juntas parroquiales
+            de cada provincia. Toca una para ver sus instituciones.
           </p>
           <div class="bars" id="provinces"></div>
           <div class="province-note">
-            La provincia se infiere del RUC y puede reflejar límites históricos.
+            Algunas instituciones aparecen en la provincia donde se registraron,
+            que no siempre es donde trabajan.
           </div>
         </aside>
       </section>
@@ -169,14 +171,6 @@
       <section id="entity" class="hidden"></section>
     </main>
 
-    <section class="agent-strip wrap">
-      <div>
-        <div class="eyebrow">DATOS QUE PUEDES USAR</div>
-        <h2>También para tus agentes.</h2>
-        <p>Conecta tu asistente a los datos públicos con MCP.</p>
-      </div>
-      <a class="button" href="/developers">Conectar un agente ↗</a>
-    </section>
     <footer class="wrap" id="foot"></footer>
 
     <script>
@@ -185,7 +179,7 @@
         prefectura: "Prefecturas",
         parroquia: "Juntas parroquiales",
         empresa: "Empresas públicas",
-        otro: "Gobierno central y otras",
+        otro: "Ministerios y otras",
       };
       const LOCAL = ["municipio", "prefectura", "parroquia", "empresa"];
       const MONTHS = [
@@ -202,13 +196,41 @@
         "Nov",
         "Dic",
       ];
-      const usd = (n, compact) =>
-        new Intl.NumberFormat("es-EC", {
+      // Compact amounts read as words ("$17,9 millones", "$450 mil"), not "$18 M".
+      const usd = (n, compact) => {
+        if (compact && n >= 1e6) {
+          const m = Number((n / 1e6).toFixed(n < 1e8 ? 1 : 0));
+          return `$${m.toLocaleString("es-EC")} ${m === 1 ? "millón" : "millones"}`;
+        }
+        if (compact && n >= 1e3)
+          return `$${Math.round(n / 1e3).toLocaleString("es-EC")} mil`;
+        return new Intl.NumberFormat("es-EC", {
           style: "currency",
           currency: "USD",
           maximumFractionDigits: 0,
-          notation: compact ? "compact" : "standard",
         }).format(n);
+      };
+      const MONTH_NAMES = [
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
+      ];
+      // "de enero a octubre de 2026", or "en marzo de 2026" for a single month.
+      const period = () => {
+        const [a, b] = [meta.months[0], meta.months.at(-1)];
+        return a === b
+          ? `en ${MONTH_NAMES[a - 1]} de ${meta.year}`
+          : `de ${MONTH_NAMES[a - 1]} a ${MONTH_NAMES[b - 1]} de ${meta.year}`;
+      };
       const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
       const esc = (s) =>
         String(s).replace(
@@ -247,15 +269,15 @@
             fetch(`/data/compras/${f}.json`).then((r) => r.json()),
           ),
         );
-        const period = `${MONTHS[meta.months[0] - 1]}–${MONTHS[meta.months.at(-1) - 1]} ${meta.year}`;
         document.getElementById("kpis").innerHTML = `
-    <div class="kpi"><b>${usd(meta.total, true)}</b><span>adjudicado, ${period}</span></div>
-    <div class="kpi"><b>${meta.awards.toLocaleString("es-EC")}</b><span>adjudicaciones</span></div>
-    <div class="kpi"><b>${meta.entities.toLocaleString("es-EC")}</b><span>entidades compradoras</span></div>`;
+    <div class="kpi"><b>${usd(meta.total, true)}</b><span>contratados ${period()}</span></div>
+    <div class="kpi"><b>${meta.awards.toLocaleString("es-EC")}</b><span>contratos</span></div>
+    <div class="kpi"><b>${meta.entities.toLocaleString("es-EC")}</b><span>instituciones públicas que compraron</span></div>`;
         document.getElementById("foot").innerHTML = `
-    <p><b>Fuente:</b> <a href="${meta.sourceUrl}" rel="noopener">${meta.source}</a>, licencia <a href="${meta.licenseUrl}" rel="noopener">${meta.license}</a>. Datos procesados el ${new Date(meta.generated).toLocaleDateString("es-EC")}.</p>
-    <p>Este sitio es independiente y no es una fuente oficial. Muestra <b>compras públicas</b> (bienes, obras y servicios contratados); no incluye sueldos, pensiones, deuda ni transferencias entre entidades. La provincia se toma del RUC de la entidad, por eso las instituciones nacionales aparecen en Pichincha.</p>
-    <p>Las señales marcadas son patrones que vale la pena revisar, no pruebas de irregularidad. Revisa siempre el proceso original en el SERCOP.</p>`;
+    <p><b>De dónde salen estos datos:</b> del portal oficial de compras públicas, <a href="${meta.sourceUrl}" rel="noopener">${meta.source}</a> (licencia <a href="${meta.licenseUrl}" rel="noopener">${meta.license}</a>). Última actualización: ${new Date(meta.generated).toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" })}.</p>
+    <p><b>Qué incluye:</b> solo las compras del Estado, es decir, bienes, obras y servicios que contrata. No incluye sueldos, pensiones ni deuda. Los montos son lo que se contrató, que no siempre es lo que ya se pagó. Los ministerios y otras instituciones nacionales aparecen en Pichincha porque están registrados en Quito.</p>
+    <p><b>Sobre las alertas ⚑:</b> marcan algo que conviene mirar con atención. No significan que haya corrupción. Para confirmar, abre el contrato original en el SERCOP.</p>
+    <p>Ecuador Abierto es un proyecto independiente; no es una página del gobierno.</p>`;
         renderKinds();
         renderProvinces();
         renderResults();
@@ -307,19 +329,19 @@
         );
         const shown = list.slice(0, visibleCount);
         document.getElementById("result-count").textContent =
-          `${list.length.toLocaleString("es-EC")} ${list.length === 1 ? "entidad" : "entidades"}${province ? " en " + province : ""}`;
+          `${list.length.toLocaleString("es-EC")} ${list.length === 1 ? "institución" : "instituciones"}${province ? " en " + province : ""}`;
         document.getElementById("more").hidden = list.length <= visibleCount;
         document.getElementById("results").innerHTML =
           shown
             .map(
               (b) => `
     <li><a href="#/e/${b.ruc}"><span class="entity-icon" aria-hidden="true">▥</span>
-      <span class="entity-name"><span class="nm">${esc(nice(b.name))}</span><br><span class="sub">${esc(b.province)} · ${b.processes} procesos${b.signals ? " · ⚑ revisar" : ""}</span></span>
+      <span class="entity-name"><span class="nm">${esc(nice(b.name))}</span><br><span class="sub">${esc(b.province)} · ${b.processes} ${b.processes === 1 ? "contrato" : "contratos"}${b.signals ? " · ⚑ mirar con atención" : ""}</span></span>
       <span class="amt">${usd(b.total, true)} <span class="arrow" aria-hidden="true">↗</span></span></a></li>`,
             )
             .join("") +
           (!list.length
-            ? `<li class="muted" style="padding:10px 4px">Sin resultados.</li>`
+            ? `<li class="muted" style="padding:10px 4px">No encontramos instituciones con ese nombre. Prueba con otra palabra, por ejemplo el nombre del cantón.</li>`
             : "");
       }
 
@@ -359,7 +381,7 @@
         el.innerHTML = `<div class="card muted">Cargando…</div>`;
         const r = await fetch(`/data/compras/b/${ruc}.json`);
         if (!r.ok) {
-          el.innerHTML = `<div class="card">No encontramos esa entidad. <a href="#/">Volver</a></div>`;
+          el.innerHTML = `<div class="card">No encontramos esa institución. <a href="#/">Volver al buscador</a></div>`;
           return;
         }
         const d = await r.json();
@@ -368,19 +390,19 @@
         const maxS = d.topSuppliers[0]?.amount || 1;
         const months = meta.months;
         el.innerHTML = `
-    <a class="back" href="#/">← Volver</a>
+    <a class="back" href="#/">← Volver al buscador</a>
     <div class="card">
       <h2 style="font-size:1.35rem">${esc(nice(d.name))}</h2>
-      <div class="muted">${KINDS[d.kind]} · ${esc(d.province)} · ${MONTHS[months[0] - 1]}–${MONTHS[months.at(-1) - 1]} ${meta.year}</div>
+      <div class="muted">${KINDS[d.kind]} · ${esc(d.province)} · ${period()}</div>
       <div class="stats">
-        <div class="stat"><b>${usd(d.total)}</b><span>adjudicado</span></div>
-        <div class="stat"><b>${d.processes}</b><span>procesos</span></div>
-        <div class="stat"><b>${d.suppliers}</b><span>proveedores</span></div>
+        <div class="stat"><b>${usd(d.total)}</b><span>contratados</span></div>
+        <div class="stat"><b>${d.processes}</b><span>contratos</span></div>
+        <div class="stat"><b>${d.suppliers}</b><span>empresas o personas que le vendieron</span></div>
       </div>
-      ${d.signals.map((s) => `<div class="signal">⚑ ${esc(s.text)} Vale la pena revisarlo; no es prueba de irregularidad.</div>`).join("")}
+      ${d.signals.map((s) => `<div class="signal">⚑ ${esc(s.text)} Conviene mirarlo con atención, pero no prueba que haya algo indebido.</div>`).join("")}
     </div>
     <div class="card">
-      <h2>Monto adjudicado por mes</h2>
+      <h2>Cuánto contrató cada mes</h2>
       <div class="months">${months.map((m) => `<div title="${MONTHS[m - 1]}: ${usd(d.monthly[m - 1])}" style="height:${((d.monthly[m - 1] / maxM) * 100).toFixed(1)}%"></div>`).join("")}${"<span></span>".repeat(12 - months.length)}</div>
       <div class="months-lbl">${months.map((m) => `<span>${MONTHS[m - 1]}</span>`).join("")}</div>
     </div>
@@ -395,18 +417,18 @@
         .join("")}</div>
     </div>
     <div class="card">
-      <h2>Adjudicaciones más grandes</h2>
-      <div class="table-scroll"><table><thead><tr><th>Proveedor</th><th class="hide-sm">Fecha</th><th class="num">Monto</th><th></th></tr></thead><tbody>
+      <h2>Sus contratos más grandes</h2>
+      <div class="table-scroll"><table><thead><tr><th>A quién</th><th class="hide-sm">Fecha</th><th class="num">Monto</th><th></th></tr></thead><tbody>
       ${d.largest
         .map(
           (
             a,
           ) => `<tr><td>${esc(a.suppliers.map(nice).join(", ") || "Sin dato")}</td><td class="hide-sm date">${esc(a.date)}</td><td class="num">${usd(a.amount)}</td>
-        <td><a href="https://datosabiertos.compraspublicas.gob.ec/PLATAFORMA/ocds/${encodeURIComponent(a.ocid)}" target="_blank" rel="noopener">Ver</a></td></tr>`,
+        <td><a href="https://datosabiertos.compraspublicas.gob.ec/PLATAFORMA/ocds/${encodeURIComponent(a.ocid)}" target="_blank" rel="noopener">Ver contrato</a></td></tr>`,
         )
         .join("")}
       </tbody></table></div>
-      <p class="muted">"Ver" abre el proceso en la plataforma oficial del SERCOP.</p>
+      <p class="muted">"Ver contrato" abre el documento oficial en el portal del SERCOP.</p>
     </div>`;
         window.scrollTo(0, 0);
       }
@@ -435,7 +457,7 @@
       window.addEventListener("hashchange", route);
       load().catch(() => {
         document.getElementById("results").innerHTML =
-          `<li class="muted">No se pudieron cargar los datos.</li>`;
+          `<li class="muted">No pudimos cargar los datos. Revisa tu conexión y vuelve a cargar la página.</li>`;
       });
     </script>
   </body>
