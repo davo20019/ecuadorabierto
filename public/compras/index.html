@@ -168,6 +168,41 @@
         </aside>
       </section>
 
+      <section id="processes" class="card">
+        <div class="eyebrow"><span class="live-dot"></span> EN VIVO DESDE EL SERCOP</div>
+        <h2>Busca un contrato</h2>
+        <p class="muted">
+          Escribe qué se compró, quién compró o quién vendió. Buscamos
+          directamente en el portal del SERCOP, así que verás los contratos
+          más recientes.
+        </p>
+        <form class="search" id="pform">
+          <input
+            id="pq"
+            type="search"
+            placeholder="Ej.: medicinas, alquiler de maquinaria, asfalto"
+            autocomplete="off"
+            aria-label="Buscar contratos"
+          />
+        </form>
+        <div class="result-toolbar">
+          <span id="pcount" role="status"></span
+          ><label
+            >Buscar en
+            <select id="pfield">
+              <option value="query">Todo</option>
+              <option value="buyer">Quién compró</option>
+              <option value="supplier">Quién vendió</option>
+            </select></label
+          ><label
+            >Año
+            <select id="pyear"></select></label
+          >
+        </div>
+        <ul class="results" id="presults"></ul>
+        <button class="more" id="pmore" hidden>Ver más ↓</button>
+      </section>
+
       <section id="entity" class="hidden"></section>
     </main>
 
@@ -433,9 +468,86 @@
         window.scrollTo(0, 0);
       }
 
+      // Live contract search: SERCOP's API returns 10 processes per page.
+      let pPage = 1,
+        pSeq = 0;
+      async function searchProcesses(append) {
+        const text = document.getElementById("pq").value.trim();
+        const list = document.getElementById("presults");
+        if (!text) {
+          list.innerHTML = "";
+          document.getElementById("pcount").textContent = "";
+          document.getElementById("pmore").hidden = true;
+          return;
+        }
+        const mine = ++pSeq;
+        pPage = append ? pPage + 1 : 1;
+        const qs = new URLSearchParams({
+          [document.getElementById("pfield").value === "query"
+            ? "q"
+            : document.getElementById("pfield").value]: text,
+          year: document.getElementById("pyear").value,
+          page: String(pPage),
+        });
+        if (!append) document.getElementById("pcount").textContent = "Buscando…";
+        try {
+          const r = await fetch(`/api/compras/processes?${qs}`);
+          if (!r.ok) throw new Error();
+          const d = await r.json();
+          if (mine !== pSeq) return;
+          document.getElementById("pcount").textContent =
+            `${d.total.toLocaleString("es-EC")} ${d.total === 1 ? "contrato" : "contratos"}`;
+          document.getElementById("pmore").hidden = !d.nextPage;
+          const html = d.results
+            .map(
+              (p) => `
+    <li><a href="${esc(p.url)}" target="_blank" rel="noopener"><span class="entity-icon" aria-hidden="true">▤</span>
+      <span class="entity-name"><span class="nm">${esc(p.description || p.title || p.ocid)}</span><br><span class="sub">${esc(nice(p.buyer || "Sin dato"))}${p.locality ? " · " + esc(nice(p.locality)) : ""}${p.type ? " · " + esc(p.type) : ""}${p.date ? " · " + esc(p.date.slice(0, 10)) : ""}</span></span>
+      <span class="amt">${p.amount != null ? usd(p.amount, true) : ""} <span class="arrow" aria-hidden="true">↗</span></span></a></li>`,
+            )
+            .join("");
+          if (append) list.insertAdjacentHTML("beforeend", html);
+          else
+            list.innerHTML =
+              html ||
+              `<li class="muted" style="padding:10px 4px">No encontramos contratos con esas palabras en ${esc(document.getElementById("pyear").value)}. Prueba con otra palabra u otro año.</li>`;
+        } catch {
+          if (mine !== pSeq) return;
+          document.getElementById("pcount").textContent = "";
+          document.getElementById("pmore").hidden = true;
+          if (!append)
+            list.innerHTML = `<li class="muted" style="padding:10px 4px">El portal del SERCOP no respondió. A veces se satura; vuelve a intentarlo en unos minutos.</li>`;
+        }
+      }
+      {
+        const y = new Date().getFullYear();
+        document.getElementById("pyear").innerHTML = Array.from(
+          { length: y - 2015 + 1 },
+          (_, i) => `<option>${y - i}</option>`,
+        ).join("");
+        let t;
+        document.getElementById("pq").addEventListener("input", () => {
+          clearTimeout(t);
+          t = setTimeout(() => searchProcesses(false), 500);
+        });
+        document.getElementById("pform").addEventListener("submit", (e) => {
+          e.preventDefault();
+          clearTimeout(t);
+          searchProcesses(false);
+        });
+        for (const id of ["pfield", "pyear"])
+          document
+            .getElementById(id)
+            .addEventListener("change", () => searchProcesses(false));
+        document
+          .getElementById("pmore")
+          .addEventListener("click", () => searchProcesses(true));
+      }
+
       function route() {
         const m = location.hash.match(/^#\/e\/(\d{13})$/);
         document.getElementById("home").classList.toggle("hidden", !!m);
+        document.getElementById("processes").classList.toggle("hidden", !!m);
         document.getElementById("entity").classList.toggle("hidden", !m);
         document.body.classList.toggle("detail-view", !!m);
         if (m) showEntity(m[1]);

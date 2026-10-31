@@ -80,6 +80,8 @@
       >
       <div>
         <a href="/compras/">Compras públicas</a
+        ><a href="/presupuesto/">Presupuesto</a
+        ><a href="/datos/">Catálogo de datos</a
         ><a href="/developers"
           >Para programadores <span aria-hidden="true">↗</span></a
         >
@@ -111,14 +113,26 @@
           <p class="module-stat" id="compras-stat"></p>
           <span class="module-go">Ver las compras ↗</span>
         </a>
-        <div class="card module soon">
-          <div class="eyebrow">PRÓXIMAMENTE</div>
+        <a class="card module" href="/presupuesto/">
+          <div class="eyebrow">DISPONIBLE</div>
           <h2>Presupuesto</h2>
           <p class="muted">
-            Cuánto dinero recibe cada institución y cuánto gasta de verdad.
-            Fuente: Ministerio de Economía y Finanzas.
+            Cuánto dinero tiene cada ministerio e institución del Gobierno
+            central y cuánto gasta de verdad. Fuente: Ministerio de Economía y
+            Finanzas.
           </p>
-        </div>
+          <p class="module-stat" id="presupuesto-stat"></p>
+          <span class="module-go">Ver el presupuesto ↗</span>
+        </a>
+        <a class="card module" href="/datos/">
+          <div class="eyebrow">EN VIVO</div>
+          <h2>Catálogo de datos</h2>
+          <p class="muted">
+            Busca entre los miles de conjuntos de datos que publican las
+            instituciones del Ecuador. Fuente: datosabiertos.gob.ec.
+          </p>
+          <span class="module-go">Buscar datos ↗</span>
+        </a>
         <div class="card module soon">
           <div class="eyebrow">PRÓXIMAMENTE</div>
           <h2>Asamblea</h2>
@@ -160,6 +174,15 @@
           const millions = Math.round(meta.total / 1e6).toLocaleString("es-EC");
           document.getElementById("compras-stat").textContent =
             `$${millions} millones contratados en ${meta.year} por ${meta.entities.toLocaleString("es-EC")} instituciones`;
+        })
+        .catch(() => {});
+      fetch("/data/presupuesto/meta.json")
+        .then((r) => r.json())
+        .then((meta) => {
+          const months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+          const billions = (meta.codificado / 1e9).toFixed(1).replace(".", ",");
+          document.getElementById("presupuesto-stat").textContent =
+            `$${billions} mil millones para ${meta.year}; ${Math.round(meta.execution * 100)}% gastado hasta ${months[meta.month - 1]}`;
         })
         .catch(() => {});
     </script>

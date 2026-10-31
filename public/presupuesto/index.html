@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Presupuesto del Estado · Ecuador Abierto</title>
+    <meta
+      name="description"
+      content="Cuánto dinero tiene cada ministerio e institución del Gobierno central del Ecuador y cuánto ha gastado de verdad. Datos oficiales del Ministerio de Economía y Finanzas."
+    />
+    <link rel="canonical" href="https://ecuadorabierto.com/presupuesto/" />
+    <meta name="theme-color" content="#034ea2" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ecuador Abierto" />
+    <meta property="og:locale" content="es_EC" />
+    <meta
+      property="og:url"
+      content="https://ecuadorabierto.com/presupuesto/"
+    />
+    <meta
+      property="og:title"
+      content="Presupuesto del Estado · Ecuador Abierto"
+    />
+    <meta
+      property="og:description"
+      content="Cuánto dinero tiene cada ministerio e institución del Gobierno central del Ecuador y cuánto ha gastado de verdad."
+    />
+    <meta property="og:image" content="https://ecuadorabierto.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://ecuadorabierto.com/og.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "Ejecución del Presupuesto General del Estado del Ecuador por institución",
+        "description": "Presupuesto inicial, codificado, comprometido, devengado y pagado de cada unidad del Presupuesto General del Estado, a partir de los datos abiertos del Ministerio de Economía y Finanzas.",
+        "url": "https://ecuadorabierto.com/presupuesto/",
+        "inLanguage": "es-EC",
+        "spatialCoverage": { "@type": "Place", "name": "Ecuador" },
+        "isAccessibleForFree": true,
+        "license": "http://www.opendefinition.org/licenses/cc-by",
+        "isBasedOn": "https://www.datosabiertos.gob.ec/organization/ministerio-de-economia-y-finanzas",
+        "creator": {
+          "@type": "Organization",
+          "name": "Ecuador Abierto",
+          "url": "https://ecuadorabierto.com"
+        },
+        "distribution": [
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://ecuadorabierto.com/api/presupuesto/entities"
+          }
+        ]
+      }
+    </script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#explorer">Ir al buscador</a>
+    <nav class="topbar wrap">
+      <a class="wordmark" href="/">
+        <img class="mark" src="/favicon.svg" alt="" width="32" height="32" />
+        Ecuador Abierto<span class="wordmark-light"> / Presupuesto</span></a
+      >
+      <div>
+        <a href="#explorer">Buscar</a
+        ><a href="/developers"
+          >Para programadores <span aria-hidden="true">↗</span></a
+        >
+      </div>
+    </nav>
+    <header>
+      <div class="wrap">
+        <div class="eyebrow">
+          <span class="live-dot"></span> DATOS OFICIALES DEL MINISTERIO DE
+          ECONOMÍA Y FINANZAS
+        </div>
+        <h1>El presupuesto.<br /><em>Lo que se tiene y lo que se gasta.</em></h1>
+        <p class="intro">
+          Cuánto dinero tiene cada ministerio e institución del Gobierno
+          central, y cuánto ha gastado de verdad en lo que va del año.
+        </p>
+        <a class="hero-link" href="#explorer"
+          >Busca una institución <span>↓</span></a
+        >
+        <div class="kpis" id="kpis"></div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section id="home" class="dashboard">
+        <div class="card explorer" id="explorer">
+          <div class="eyebrow">BUSCA</div>
+          <h2>¿Cuánto ha gastado cada institución?</h2>
+          <p class="muted">
+            Escribe el nombre de un ministerio, una universidad o cualquier
+            institución del Gobierno central.
+          </p>
+          <div class="search">
+            <input
+              id="q"
+              type="search"
+              placeholder="Ej.: Salud, Educación, Universidad de Cuenca"
+              autocomplete="off"
+              aria-label="Buscar institución"
+            />
+          </div>
+          <div class="chips" id="sectors"></div>
+          <div class="result-toolbar">
+            <span id="result-count" role="status"></span
+            ><label
+              >Ordenar
+              <select id="sort">
+                <option value="amount">Más presupuesto primero</option>
+                <option value="low">Menos gastado primero</option>
+                <option value="name">Por nombre (A–Z)</option>
+              </select></label
+            >
+          </div>
+          <ul class="results" id="results"></ul>
+          <button class="more" id="more" hidden>Ver más ↓</button>
+        </div>
+        <aside class="card province-card">
+          <div class="eyebrow">EN QUÉ SE GASTA</div>
+          <h2>Todo el presupuesto, por tipo de gasto</h2>
+          <p class="muted">
+            Cuánto hay para cada cosa en el año y qué parte ya se gastó.
+          </p>
+          <div class="bars" id="groups"></div>
+        </aside>
+      </section>
+
+      <section id="entity" class="hidden"></section>
+    </main>
+
+    <footer class="wrap" id="foot"></footer>
+
+    <script>
+      const MONTHS = [
+        "Ene",
+        "Feb",
+        "Mar",
+        "Abr",
+        "May",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dic",
+      ];
+      const MONTH_NAMES = [
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
+      ];
+      const SECTORS = {
+        "ADMINISTRACION DEL ESTADO": "Ministerios y otras",
+        "ENTIDADES DE EDUCACION SUPERIOR": "Universidades",
+      };
+      // Compact amounts read as words ("$17,9 millones", "$450 mil"), not "$18 M".
+      const usd = (n, compact) => {
+        if (compact && n >= 1e9) {
+          const m = Number((n / 1e9).toFixed(1));
+          return `$${m.toLocaleString("es-EC")} mil millones`;
+        }
+        if (compact && n >= 1e6) {
+          const m = Number((n / 1e6).toFixed(n < 1e8 ? 1 : 0));
+          return `$${m.toLocaleString("es-EC")} ${m === 1 ? "millón" : "millones"}`;
+        }
+        if (compact && n >= 1e3)
+          return `$${Math.round(n / 1e3).toLocaleString("es-EC")} mil`;
+        return new Intl.NumberFormat("es-EC", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(n);
+      };
+      const pct = (x) => (x == null ? "—" : `${Math.round(x * 100)}%`);
+      const share = (a, b) => (b > 0 ? a / b : null);
+      const fold = (s) =>
+        s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      // Names arrive in capitals; title-case them for reading, keep short words lower.
+      const nice = (s) =>
+        s
+          .toLowerCase()
+          .replace(/(^|\s|\()(\p{L})/gu, (m, a, b) => a + b.toUpperCase())
+          .replace(/\b(De|Del|La|Las|Los|Y|E|En|Para|Por|O|A|Al)\b/g, (w) =>
+            w.toLowerCase(),
+          )
+          .replace(/\b(Ep|Udaf|Eod|Inspi|Unae|Espol|Epn|Senescyt)\b/gi, (w) =>
+            w.toUpperCase(),
+          );
+      // "hasta mayo de 2025": data is cumulative for the year up to the cut-off.
+      const cutoff = () => `hasta ${MONTH_NAMES[meta.month - 1]} de ${meta.year}`;
+      // Narrow panels show only the share spent; amounts stay in the tooltip.
+      const bar = (label, title, a, b, max, narrow) => `
+    <div class="row"><span class="lbl" title="${esc(title)}">${label}</span><span class="val">${narrow ? "" : usd(b, true) + " · "}${pct(share(a, b))} gastado</span>
+    <div class="track split" title="${usd(a)} de ${usd(b)}"><div class="fill planned" style="width:${((b / max) * 100).toFixed(1)}%"></div><div class="fill" style="width:${((a / max) * 100).toFixed(1)}%"></div></div></div>`;
+
+      let visibleCount = 15;
+      let meta,
+        entities = [],
+        groups = [],
+        sector = "all";
+
+      async function load() {
+        [meta, entities, groups] = await Promise.all(
+          ["meta", "entities", "groups"].map((f) =>
+            fetch(`/data/presupuesto/${f}.json`).then((r) => r.json()),
+          ),
+        );
+        document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><b>${usd(meta.codificado, true)}</b><span>para gastar en todo ${meta.year}</span></div>
+    <div class="kpi"><b>${usd(meta.devengado, true)}</b><span>ya gastados ${cutoff()} (${pct(meta.execution)})</span></div>
+    <div class="kpi"><b>${meta.entities.toLocaleString("es-EC")}</b><span>instituciones del Gobierno central</span></div>`;
+        document.getElementById("foot").innerHTML = `
+    <p><b>De dónde salen estos datos:</b> del ${esc(meta.source)}, publicado en el <a href="${meta.sourceUrl}" rel="noopener">portal de datos abiertos</a> (licencia <a href="${meta.licenseUrl}" rel="noopener">${esc(meta.license)}</a>). Las cifras llegan ${cutoff()}; el Ministerio las publica con retraso. Última actualización de esta página: ${new Date(meta.generated).toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" })}.</p>
+    <p><b>Qué significa cada cifra:</b> el <i>presupuesto</i> es el monto codificado, es decir, lo aprobado para el año con sus cambios. <i>Gastado</i> es lo devengado: obras, bienes o servicios ya recibidos que el Estado debe pagar. <i>Pagado</i> es lo que ya salió de la caja.</p>
+    <p><b>Qué no incluye:</b> solo cubre el Presupuesto General del Estado. Los municipios, prefecturas, juntas parroquiales, el IESS y las empresas públicas tienen presupuestos propios y no aparecen aquí. Algunas filas, como "Deuda pública" o "Ingresos y transferencias", son cuentas del Estado, no instituciones.</p>
+    <p>Ecuador Abierto es un proyecto independiente; no es una página del gobierno.</p>`;
+        renderSectors();
+        renderGroups();
+        renderResults();
+        route();
+      }
+
+      function renderSectors() {
+        const el = document.getElementById("sectors");
+        el.innerHTML = Object.entries({ all: "Todas", ...SECTORS })
+          .map(
+            ([k, v]) =>
+              `<button class="chip" data-k="${esc(k)}" aria-pressed="${k === sector}">${v}</button>`,
+          )
+          .join("");
+        el.onclick = (e) => {
+          const b = e.target.closest("button");
+          if (!b) return;
+          sector = b.dataset.k;
+          visibleCount = 15;
+          renderSectors();
+          renderResults();
+        };
+      }
+
+      function renderResults() {
+        const terms = fold(document.getElementById("q").value)
+          .split(/\s+/)
+          .filter(Boolean);
+        const list = entities.filter(
+          (e) =>
+            (sector === "all" || e.sector === sector) &&
+            terms.every((t) => fold(e.name).includes(t)),
+        );
+        const by = document.getElementById("sort").value;
+        list.sort(
+          by === "name"
+            ? (a, b) => a.name.localeCompare(b.name, "es")
+            : by === "low"
+              ? (a, b) => (a.execution ?? 2) - (b.execution ?? 2)
+              : (a, b) => b.codificado - a.codificado,
+        );
+        const shown = list.slice(0, visibleCount);
+        document.getElementById("result-count").textContent =
+          `${list.length.toLocaleString("es-EC")} ${list.length === 1 ? "institución" : "instituciones"}`;
+        document.getElementById("more").hidden = list.length <= visibleCount;
+        document.getElementById("results").innerHTML =
+          shown
+            .map(
+              (e) => `
+    <li><a href="#/e/${esc(e.code)}"><span class="entity-icon" aria-hidden="true">▥</span>
+      <span class="entity-name"><span class="nm">${esc(nice(e.name))}</span><br><span class="sub">${SECTORS[e.sector] ?? esc(nice(e.sector))} · ${pct(e.execution)} gastado ${cutoff()}</span></span>
+      <span class="amt">${usd(e.codificado, true)} <span class="arrow" aria-hidden="true">↗</span></span></a></li>`,
+            )
+            .join("") +
+          (!list.length
+            ? `<li class="muted" style="padding:10px 4px">No encontramos instituciones con ese nombre. Prueba con otra palabra. Recuerda que los municipios y prefecturas no están en este presupuesto.</li>`
+            : "");
+      }
+
+      function renderGroups() {
+        const max = groups[0]?.codificado || 1;
+        document.getElementById("groups").innerHTML = groups
+          .filter((g) => g.codificado > 0)
+          .map((g) =>
+            bar(esc(nice(g.name)), g.name, g.devengado, g.codificado, max, true),
+          )
+          .join("");
+      }
+
+      async function showEntity(code) {
+        const el = document.getElementById("entity");
+        el.innerHTML = `<div class="card muted">Cargando…</div>`;
+        const r = await fetch(`/data/presupuesto/e/${code}.json`);
+        if (!r.ok) {
+          el.innerHTML = `<div class="card">No encontramos esa institución. <a href="#/">Volver al buscador</a></div>`;
+          return;
+        }
+        const d = await r.json();
+        document.title = `${nice(d.name)} · Presupuesto · Ecuador Abierto`;
+        const maxG = d.byGroup[0]?.codificado || 1;
+        const byMonth = Object.fromEntries(d.monthly.map((m) => [m.month, m]));
+        el.innerHTML = `
+    <a class="back" href="#/">← Volver al buscador</a>
+    <div class="card">
+      <h2 style="font-size:1.35rem">${esc(nice(d.name))}</h2>
+      <div class="muted">${SECTORS[d.sector] ?? esc(nice(d.sector))} · ${meta.year}, ${cutoff()}</div>
+      <div class="stats">
+        <div class="stat"><b>${usd(d.codificado)}</b><span>presupuesto del año</span></div>
+        <div class="stat"><b>${usd(d.devengado)}</b><span>gastado (${pct(d.execution)})</span></div>
+        <div class="stat"><b>${usd(d.pagado)}</b><span>pagado</span></div>
+      </div>
+      ${d.inicial !== d.codificado ? `<p class="muted">Empezó el año con ${usd(d.inicial)}; con los cambios aprobados quedó en ${usd(d.codificado)}.</p>` : ""}
+    </div>
+    <div class="card">
+      <h2>Cuánto llevaba gastado cada mes</h2>
+      <p class="muted">Gasto acumulado desde enero, como parte del presupuesto del año.</p>
+      <div class="months">${MONTHS.map((_, i) => {
+        const m = byMonth[i + 1];
+        return m
+          ? `<div title="${MONTHS[i]}: ${usd(m.devengado)} (${pct(share(m.devengado, m.codificado))})" style="height:${((share(m.devengado, m.codificado) ?? 0) * 100).toFixed(1)}%"></div>`
+          : "<span></span>";
+      }).join("")}</div>
+      <div class="months-lbl">${MONTHS.map((m) => `<span>${m}</span>`).join("")}</div>
+    </div>
+    <div class="card">
+      <h2>¿En qué gasta?</h2>
+      <div class="bars">${d.byGroup
+        .filter((g) => g.codificado > 0)
+        .map((g) => bar(esc(nice(g.name)), g.name, g.devengado, g.codificado, maxG))
+        .join("")}</div>
+    </div>
+    <div class="card">
+      <h2>Sus gastos más grandes</h2>
+      <div class="table-scroll"><table><thead><tr><th>Para qué</th><th class="num">Presupuesto</th><th class="num">Gastado</th></tr></thead><tbody>
+      ${d.topItems.map((i) => `<tr><td>${esc(nice(i.name))}</td><td class="num">${usd(i.codificado)}</td><td class="num">${usd(i.devengado)}</td></tr>`).join("")}
+      </tbody></table></div>
+    </div>
+    ${
+      d.unitCount > 1
+        ? `<div class="card">
+      <h2>Sus oficinas y unidades</h2>
+      <p class="muted">${d.unitCount} unidades manejan parte de este presupuesto${d.unitCount > d.units.length ? `; estas son las ${d.units.length} más grandes` : ""}.</p>
+      <div class="table-scroll"><table><thead><tr><th>Unidad</th><th class="num">Presupuesto</th><th class="num hide-sm">Gastado</th></tr></thead><tbody>
+      ${d.units.map((u) => `<tr><td>${esc(nice(u.name))}</td><td class="num">${usd(u.codificado)}</td><td class="num hide-sm">${pct(share(u.devengado, u.codificado))}</td></tr>`).join("")}
+      </tbody></table></div>
+    </div>`
+        : ""
+    }`;
+        window.scrollTo(0, 0);
+      }
+
+      function route() {
+        const m = location.hash.match(/^#\/e\/(\d{1,6})$/);
+        document.getElementById("home").classList.toggle("hidden", !!m);
+        document.getElementById("entity").classList.toggle("hidden", !m);
+        document.body.classList.toggle("detail-view", !!m);
+        if (m) showEntity(m[1]);
+        else document.title = "Presupuesto del Estado · Ecuador Abierto";
+      }
+
+      document.getElementById("q").addEventListener("input", () => {
+        visibleCount = 15;
+        renderResults();
+      });
+      document.getElementById("sort").addEventListener("change", () => {
+        visibleCount = 15;
+        renderResults();
+      });
+      document.getElementById("more").addEventListener("click", () => {
+        visibleCount += 15;
+        renderResults();
+      });
+      window.addEventListener("hashchange", route);
+      load().catch(() => {
+        document.getElementById("results").innerHTML =
+          `<li class="muted">No pudimos cargar los datos. Revisa tu conexión y vuelve a cargar la página.</li>`;
+      });
+    </script>
+  </body>
+</html>

@@ -6,7 +6,7 @@
     <title>MCP y API · Ecuador Abierto</title>
     <meta
       name="description"
-      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público y herramientas de consulta, empezando por las compras públicas del SERCOP."
+      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público con herramientas de compras públicas, presupuesto del Estado y catálogo de datos abiertos."
     />
     <link rel="canonical" href="https://ecuadorabierto.com/developers" />
     <meta name="theme-color" content="#034ea2" />
@@ -21,7 +21,7 @@
     <meta property="og:title" content="MCP y API · Ecuador Abierto" />
     <meta
       property="og:description"
-      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público y herramientas de consulta, empezando por las compras públicas del SERCOP."
+      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público con herramientas de compras públicas, presupuesto del Estado y catálogo de datos abiertos."
     />
     <meta property="og:image" content="https://ecuadorabierto.com/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -31,7 +31,7 @@
     <meta name="twitter:title" content="MCP y API · Ecuador Abierto" />
     <meta
       name="twitter:description"
-      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público y herramientas de consulta, empezando por las compras públicas del SERCOP."
+      content="Conecta agentes a los datos públicos del Ecuador con MCP. Endpoint público con herramientas de compras públicas, presupuesto del Estado y catálogo de datos abiertos."
     />
     <meta name="twitter:image" content="https://ecuadorabierto.com/og.png" />
     <script type="application/ld+json">
@@ -61,8 +61,9 @@
       <div class="eyebrow">DATOS ABIERTOS / PARA DESARROLLADORES</div>
       <h1>Datos públicos.<br /><em>Listos para tus agentes.</em></h1>
       <p class="intro">
-        Un solo servidor MCP para todos los módulos de Ecuador Abierto. Hoy:
-        entidades, proveedores y montos adjudicados en compras públicas.
+        Un solo servidor MCP para todos los módulos de Ecuador Abierto: compras
+        públicas, presupuesto del Gobierno central y el catálogo nacional de
+        datos abiertos.
       </p>
       <section class="card">
         <h2>Conecta por MCP</h2>
@@ -96,7 +97,7 @@
         </p>
       </section>
       <section class="card">
-        <h2>Compras públicas: cuatro herramientas</h2>
+        <h2>Compras públicas: seis herramientas</h2>
         <div class="table-scroll">
           <table>
             <thead>
@@ -134,6 +135,21 @@
                   defecto; falso incluye todas las entidades.
                 </td>
               </tr>
+              <tr>
+                <td><code>compras_search_processes</code> <em>en vivo</em></td>
+                <td>
+                  Busca procesos en la API OCDS del SERCOP por
+                  <code>year</code>, <code>query</code>, <code>buyer</code> o
+                  <code>supplier</code>. 10 resultados por <code>page</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><code>compras_get_process</code> <em>en vivo</em></td>
+                <td>
+                  Un proceso por <code>ocid</code>: convocatoria,
+                  adjudicaciones, contratos y enlace al registro oficial.
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -141,7 +157,94 @@
           Tipos: municipio, prefectura, parroquia, empresa, otro. Recurso MCP:
           <code>ecuador-abierto://compras/dataset/info</code>. Cada resultado
           incluye metadatos y límites de interpretación. Las herramientas de
-          cada módulo llevan su prefijo (<code>compras_</code>, …).
+          cada módulo llevan su prefijo (<code>compras_</code>, …). Las
+          herramientas <em>en vivo</em> consultan al SERCOP en el momento y
+          fallan con un error claro si su servidor no responde.
+        </p>
+      </section>
+      <section class="card">
+        <h2>Presupuesto: cuatro herramientas</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Herramienta</th>
+                <th>Consulta</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>presupuesto_get_dataset_info</code></td>
+                <td>
+                  Mes de corte, totales nacionales, curva del año, conjunto de
+                  datos de origen y licencia.
+                </td>
+              </tr>
+              <tr>
+                <td><code>presupuesto_search_entities</code></td>
+                <td>
+                  Busca instituciones (UDAF) por <code>query</code> y
+                  <code>sector</code>. Paginación con <code>limit</code> y
+                  <code>offset</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><code>presupuesto_get_entity</code></td>
+                <td>
+                  Usa el <code>code</code> de una institución: grupos de gasto,
+                  unidades, principales partidas y avance mensual.
+                </td>
+              </tr>
+              <tr>
+                <td><code>presupuesto_list_groups</code></td>
+                <td>Totales nacionales por grupo de gasto.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted">
+          Presupuesto General del Estado: no incluye municipios, prefecturas,
+          juntas parroquiales, IESS ni empresas públicas. Cifras acumuladas en
+          el año hasta el mes de corte. Recurso MCP:
+          <code>ecuador-abierto://presupuesto/dataset/info</code>.
+        </p>
+      </section>
+      <section class="card">
+        <h2>Catálogo de datos: tres herramientas en vivo</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Herramienta</th>
+                <th>Consulta</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>datos_search_datasets</code></td>
+                <td>
+                  Busca en datosabiertos.gob.ec por <code>query</code> y
+                  <code>publisher</code>. Paginación con <code>limit</code>
+                  (1–50) y <code>offset</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><code>datos_get_dataset</code></td>
+                <td>
+                  Un conjunto por <code>id</code>: descripción, licencia,
+                  etiquetas y archivos descargables.
+                </td>
+              </tr>
+              <tr>
+                <td><code>datos_list_publishers</code></td>
+                <td>Instituciones que publican y cuántos conjuntos tiene cada una.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted">
+          Devuelve descripciones y enlaces, no los datos. Cada conjunto tiene su
+          propia licencia.
         </p>
       </section>
       <section class="card">
@@ -153,6 +256,14 @@
         <p>
           “Compara el monto adjudicado por los gobiernos locales de Azuay y
           Manabí. Explica qué incluyen esas cifras.”
+        </p>
+        <p>
+          “¿Qué porcentaje de su presupuesto había gastado el Ministerio de
+          Salud al mes de corte? ¿En qué grupos de gasto va más atrasado?”
+        </p>
+        <p>
+          “Busca contratos de medicinas de este año en el SERCOP y busca en el
+          catálogo de datos abiertos si hay datos de salud relacionados.”
         </p>
       </section>
       <section class="card">
@@ -174,14 +285,47 @@
               ><code>GET /api/compras/provinces</code></a
             >
           </li>
+          <li>
+            <a href="/api/compras/processes?q=hospital"
+              ><code>GET /api/compras/processes?q=hospital&amp;year=…&amp;page=1</code></a
+            >
+            (en vivo)
+          </li>
+          <li><code>GET /api/compras/processes/:ocid</code> (en vivo)</li>
+          <li>
+            <a href="/api/presupuesto/meta"><code>GET /api/presupuesto/meta</code></a>
+          </li>
+          <li>
+            <a href="/api/presupuesto/entities?q=salud"
+              ><code>GET /api/presupuesto/entities?q=salud</code></a
+            >
+          </li>
+          <li><code>GET /api/presupuesto/entities/:code</code></li>
+          <li>
+            <a href="/api/presupuesto/groups"
+              ><code>GET /api/presupuesto/groups</code></a
+            >
+          </li>
+          <li>
+            <a href="/api/datos/datasets?q=impuestos"
+              ><code>GET /api/datos/datasets?q=impuestos&amp;publisher=…</code></a
+            >
+            (en vivo)
+          </li>
+          <li><code>GET /api/datos/datasets/:id</code> (en vivo)</li>
+          <li>
+            <a href="/api/datos/publishers"><code>GET /api/datos/publishers</code></a>
+            (en vivo)
+          </li>
         </ul>
       </section>
       <section class="card">
         <h2>Antes de interpretar los datos</h2>
         <p>
-          Esta es una instantánea de adjudicaciones del SERCOP, no una consulta
-          en tiempo real. Consulta los metadatos para saber la cobertura y fecha
-          de procesamiento.
+          Las entidades de compras y el presupuesto son instantáneas, no
+          consultas en tiempo real. Consulta los metadatos de cada módulo para
+          saber la cobertura y fecha de procesamiento. Las herramientas en vivo
+          dependen de que el SERCOP y datosabiertos.gob.ec estén disponibles.
         </p>
         <p>
           No incluye el presupuesto completo, sueldos, pensiones, deuda ni

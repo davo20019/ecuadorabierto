@@ -369,6 +369,17 @@ h2 {
   background: var(--bar);
   border-radius: 4px;
 }
+/* Budget bars: the faint layer is the budget, the solid layer what was spent. */
+.track.split {
+  position: relative;
+}
+.track.split .fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+}
+.track.split .fill.planned {
+  opacity: 0.3;
+}
 .linkish {
   padding: 0;
   border: 0;

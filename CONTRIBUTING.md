@@ -2,7 +2,7 @@
 
 Thank you for helping make Ecuador's public data easier to understand.
 
-New modules follow the layout in the README: a page under `public/<module>/`, data under `public/data/<module>/`, REST under `/api/<module>/`, and MCP tools prefixed `<module>_`. Open an issue to discuss the source and its license before building one.
+New modules follow the layout in the README: a page under `public/<module>/`, data under `public/data/<module>/`, REST under `/api/<module>/`, and MCP tools prefixed `<module>_`. Live calls to upstream APIs go in `src/live.ts`. Open an issue to discuss the source and its license before building one; prefer sources with an API to find or query the data, and validate downloaded files so a format change fails the build instead of publishing wrong numbers.
 
 1. Open an issue describing a bug or proposed improvement. For data discrepancies, include the public SERCOP process link and dataset period.
 2. Fork the repository and create a branch for your change.

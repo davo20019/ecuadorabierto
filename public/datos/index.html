@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catálogo de datos abiertos · Ecuador Abierto</title>
+    <meta
+      name="description"
+      content="Busca entre los conjuntos de datos que publican las instituciones del Ecuador en el portal oficial de datos abiertos: quién los publica, cuándo se actualizaron y dónde descargarlos."
+    />
+    <link rel="canonical" href="https://ecuadorabierto.com/datos/" />
+    <meta name="theme-color" content="#034ea2" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ecuador Abierto" />
+    <meta property="og:locale" content="es_EC" />
+    <meta property="og:url" content="https://ecuadorabierto.com/datos/" />
+    <meta
+      property="og:title"
+      content="Catálogo de datos abiertos · Ecuador Abierto"
+    />
+    <meta
+      property="og:description"
+      content="Busca entre los conjuntos de datos que publican las instituciones del Ecuador en el portal oficial de datos abiertos."
+    />
+    <meta property="og:image" content="https://ecuadorabierto.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://ecuadorabierto.com/og.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#explorer">Ir al buscador</a>
+    <nav class="topbar wrap">
+      <a class="wordmark" href="/">
+        <img class="mark" src="/favicon.svg" alt="" width="32" height="32" />
+        Ecuador Abierto<span class="wordmark-light"> / Catálogo de datos</span></a
+      >
+      <div>
+        <a href="#explorer">Buscar</a
+        ><a href="/developers"
+          >Para programadores <span aria-hidden="true">↗</span></a
+        >
+      </div>
+    </nav>
+    <header>
+      <div class="wrap">
+        <div class="eyebrow">
+          <span class="live-dot"></span> EN VIVO DESDE DATOSABIERTOS.GOB.EC
+        </div>
+        <h1>Todos los datos.<br /><em>En un solo buscador.</em></h1>
+        <p class="intro">
+          Las instituciones del Ecuador publican miles de conjuntos de datos en
+          el portal oficial. Búscalos aquí, mira quién los publica y descárgalos
+          desde la fuente.
+        </p>
+        <a class="hero-link" href="#explorer">Empieza a buscar <span>↓</span></a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section id="home">
+        <div class="card explorer" id="explorer">
+          <div class="eyebrow">BUSCA</div>
+          <h2>¿Qué datos necesitas?</h2>
+          <p class="muted">
+            Escribe un tema, por ejemplo impuestos, salud o presupuesto. Si no
+            escribes nada, verás lo más reciente.
+          </p>
+          <div class="search">
+            <input
+              id="q"
+              type="search"
+              placeholder="Ej.: recaudación de impuestos, defunciones, tránsito"
+              autocomplete="off"
+              aria-label="Buscar conjuntos de datos"
+            />
+          </div>
+          <div class="result-toolbar">
+            <span id="result-count" role="status"></span
+            ><label
+              >Institución
+              <select id="publisher">
+                <option value="">Todas</option>
+              </select></label
+            >
+          </div>
+          <ul class="results" id="results"></ul>
+          <button class="more" id="more" hidden>Ver más ↓</button>
+        </div>
+      </section>
+
+      <section id="dataset" class="hidden"></section>
+    </main>
+
+    <footer class="wrap">
+      <p>
+        <b>De dónde salen estos datos:</b> se consultan en vivo en el
+        <a href="https://www.datosabiertos.gob.ec" rel="noopener"
+          >Portal de Datos Abiertos del Ecuador</a
+        >. Cada conjunto tiene su propia licencia y su institución responsable;
+        revisa ambas antes de usar los datos.
+      </p>
+      <p>
+        Las descripciones las escribe cada institución. Ecuador Abierto no
+        revisa ni guarda estos archivos; los enlaces llevan a la fuente
+        original.
+      </p>
+      <p>Ecuador Abierto es un proyecto independiente; no es una página del gobierno.</p>
+    </footer>
+
+    <script>
+      const PAGE = 20;
+      const esc = (s) =>
+        String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      // Only follow http(s) links from the catalog.
+      const safeUrl = (u) => (/^https?:\/\//i.test(u ?? "") ? u : null);
+      const date = (d) =>
+        d
+          ? new Date(d + "T12:00:00").toLocaleDateString("es-EC", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          : "sin fecha";
+      const errorText = `No pudimos consultar el portal de datos abiertos. Puede estar caído; vuelve a intentarlo en unos minutos.`;
+
+      let results = [],
+        total = 0,
+        seq = 0;
+
+      async function search(append) {
+        const mine = ++seq;
+        const qs = new URLSearchParams({
+          q: document.getElementById("q").value.trim(),
+          publisher: document.getElementById("publisher").value,
+          limit: String(PAGE),
+          offset: String(append ? results.length : 0),
+        });
+        if (!append)
+          document.getElementById("result-count").textContent = "Buscando…";
+        try {
+          const r = await fetch(`/api/datos/datasets?${qs}`);
+          if (!r.ok) throw new Error();
+          const d = await r.json();
+          if (mine !== seq) return; // a newer search started
+          results = append ? results.concat(d.results) : d.results;
+          total = d.total;
+          render();
+        } catch {
+          if (mine !== seq) return;
+          document.getElementById("result-count").textContent = "";
+          document.getElementById("results").innerHTML =
+            `<li class="muted" style="padding:10px 4px">${errorText}</li>`;
+          document.getElementById("more").hidden = true;
+        }
+      }
+
+      function render() {
+        document.getElementById("result-count").textContent =
+          `${total.toLocaleString("es-EC")} ${total === 1 ? "conjunto de datos" : "conjuntos de datos"}`;
+        document.getElementById("more").hidden = results.length >= total;
+        document.getElementById("results").innerHTML =
+          results
+            .map(
+              (d) => `
+    <li><a href="#/d/${encodeURIComponent(d.id)}"><span class="entity-icon" aria-hidden="true">▤</span>
+      <span class="entity-name"><span class="nm">${esc(d.title)}</span><br><span class="sub">${esc(d.publisher ?? "Sin institución")} · actualizado el ${date(d.modified)}${d.formats.length ? " · " + esc(d.formats.join(", ").toUpperCase()) : ""}</span></span>
+      <span class="amt"><span class="arrow" aria-hidden="true">↗</span></span></a></li>`,
+            )
+            .join("") +
+          (!results.length
+            ? `<li class="muted" style="padding:10px 4px">No encontramos conjuntos de datos con esas palabras. Prueba con otra.</li>`
+            : "");
+      }
+
+      async function showDataset(id) {
+        const el = document.getElementById("dataset");
+        el.innerHTML = `<div class="card muted">Cargando…</div>`;
+        let d;
+        try {
+          const r = await fetch(`/api/datos/datasets/${encodeURIComponent(id)}`);
+          if (r.status === 404) {
+            el.innerHTML = `<div class="card">No encontramos ese conjunto de datos. <a href="#/">Volver al buscador</a></div>`;
+            return;
+          }
+          if (!r.ok) throw new Error();
+          d = await r.json();
+        } catch {
+          el.innerHTML = `<div class="card">${errorText} <a href="#/">Volver al buscador</a></div>`;
+          return;
+        }
+        document.title = `${d.title} · Catálogo de datos · Ecuador Abierto`;
+        const license = safeUrl(d.licenseUrl)
+          ? `<a href="${esc(d.licenseUrl)}" rel="noopener">${esc(d.license)}</a>`
+          : esc(d.license ?? "Sin licencia indicada");
+        el.innerHTML = `
+    <a class="back" href="#/">← Volver al buscador</a>
+    <div class="card">
+      <h2 style="font-size:1.35rem">${esc(d.title)}</h2>
+      <div class="muted">${esc(d.publisher ?? "Sin institución")} · actualizado el ${date(d.modified)}</div>
+      ${d.description ? `<p style="white-space:pre-line">${esc(d.description)}</p>` : ""}
+      <p class="muted">Licencia: ${license}. <a href="${esc(d.url)}" rel="noopener">Ver en datosabiertos.gob.ec ↗</a></p>
+    </div>
+    <div class="card">
+      <h2>Archivos para descargar</h2>
+      ${
+        d.files.length
+          ? `<div class="table-scroll"><table><thead><tr><th>Archivo</th><th>Formato</th><th class="hide-sm">Fecha</th><th></th></tr></thead><tbody>
+      ${d.files
+        .map(
+          (f) => `<tr><td>${esc(f.name ?? "Sin nombre")}</td><td>${esc((f.format ?? "").toUpperCase())}</td><td class="hide-sm date">${esc(f.modified ?? "")}</td>
+        <td>${safeUrl(f.url) ? `<a href="${esc(f.url)}" rel="noopener nofollow">Descargar</a>` : ""}</td></tr>`,
+        )
+        .join("")}
+      </tbody></table></div>
+      <p class="muted">Los archivos se descargan desde el sitio de la institución que los publica.</p>`
+          : `<p class="muted">Este conjunto no tiene archivos publicados.</p>`
+      }
+    </div>`;
+        window.scrollTo(0, 0);
+      }
+
+      function route() {
+        const m = location.hash.match(/^#\/d\/([\w-]{1,200})$/);
+        document.getElementById("home").classList.toggle("hidden", !!m);
+        document.getElementById("dataset").classList.toggle("hidden", !m);
+        document.body.classList.toggle("detail-view", !!m);
+        if (m) showDataset(m[1]);
+        else document.title = "Catálogo de datos abiertos · Ecuador Abierto";
+      }
+
+      let timer;
+      document.getElementById("q").addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => search(false), 350);
+      });
+      document
+        .getElementById("publisher")
+        .addEventListener("change", () => search(false));
+      document
+        .getElementById("more")
+        .addEventListener("click", () => search(true));
+      window.addEventListener("hashchange", route);
+
+      fetch("/api/datos/publishers")
+        .then((r) => (r.ok ? r.json() : []))
+        .then((list) => {
+          document.getElementById("publisher").innerHTML +=
+            list
+              .filter((p) => p.datasets > 0)
+              .sort((a, b) => a.name.localeCompare(b.name, "es"))
+              .map(
+                (p) =>
+                  `<option value="${esc(p.id)}">${esc(p.name)} (${p.datasets})</option>`,
+              )
+              .join("");
+        })
+        .catch(() => {});
+      search(false);
+      route();
+    </script>
+  </body>
+</html>

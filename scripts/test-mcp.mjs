@@ -9,9 +9,11 @@ const client = new Client({
 await client.connect(new StreamableHTTPClientTransport(new URL("/mcp", base)));
 try {
   const { tools } = await client.listTools();
-  assert.equal(tools.length, 4);
+  assert.equal(tools.length, 13);
   assert.ok(tools.every((t) => t.annotations.readOnlyHint));
-  assert.ok(tools.every((t) => t.name.startsWith("compras_")));
+  assert.ok(
+    tools.every((t) => /^(compras|presupuesto|datos)_/.test(t.name)),
+  );
   const call = async (name, args = {}) => {
     const r = await client.callTool({ name, arguments: args });
     assert.ok(!r.isError, JSON.stringify(r));
@@ -44,6 +46,45 @@ try {
     all.data.provinces[0].rankedAmount >
       provinces.data.provinces[0].rankedAmount,
   );
+  const budget = await call("presupuesto_get_dataset_info");
+  assert.ok(budget.data.entities > 1 && budget.data.codificado > 0);
+  assert.ok(budget.caveats.includes("devengado"));
+  const units = await call("presupuesto_search_entities", { query: "salud" });
+  assert.ok(units.data.results.length);
+  const unit = await call("presupuesto_get_entity", {
+    code: units.data.results[0].code,
+  });
+  assert.equal(unit.data.entity.name, units.data.results[0].name);
+  assert.ok(unit.data.entity.byGroup.length && unit.data.entity.monthly.length);
+  const groups = await call("presupuesto_list_groups");
+  assert.ok(groups.data.length);
+  assert.equal(
+    (
+      await client.callTool({
+        name: "presupuesto_get_entity",
+        arguments: { code: "999999" },
+      })
+    ).isError,
+    true,
+  );
+  // Live tools reach SERCOP and datosabiertos.gob.ec; SKIP_LIVE=1 skips them offline.
+  if (!process.env.SKIP_LIVE) {
+    const procs = await call("compras_search_processes", { query: "hospital" });
+    assert.ok(procs.data.total > 0 && procs.data.results[0].ocid);
+    assert.equal(procs.metadata.live, true);
+    const proc = await call("compras_get_process", {
+      ocid: procs.data.results[0].ocid,
+    });
+    assert.equal(proc.data.ocid, procs.data.results[0].ocid);
+    const sets = await call("datos_search_datasets", { query: "presupuesto" });
+    assert.ok(sets.data.results.length);
+    const set = await call("datos_get_dataset", {
+      id: sets.data.results[0].id,
+    });
+    assert.ok(Array.isArray(set.data.files));
+    const pubs = await call("datos_list_publishers");
+    assert.ok(pubs.data.length > 1);
+  }
   const resource = await client.readResource({
     uri: "ecuador-abierto://compras/dataset/info",
   });
@@ -102,6 +143,11 @@ try {
     "/api/compras/meta",
     "/api/compras/buyers?q=cuenca",
     "/api/compras/provinces",
+    "/presupuesto/",
+    "/datos/",
+    "/api/presupuesto/meta",
+    "/api/presupuesto/entities?q=salud",
+    "/api/presupuesto/groups",
     // Pre-module aliases.
     "/api/meta",
     "/api/buyers?q=cuenca",
@@ -109,7 +155,7 @@ try {
   ])
     assert.equal((await fetch(base + path)).status, 200, path);
   console.log(
-    "PASS: MCP initialization, 4 tools, metadata resource, search, accent matching, pagination, details, province scopes, invalid input, missing entity, unknown tool, CORS, malformed and oversized requests, and website/API routes (including legacy aliases).",
+    "PASS: MCP initialization, 13 tools, metadata resource, compras and presupuesto search, accent matching, pagination, details, province scopes, live SERCOP and CKAN tools (unless SKIP_LIVE), invalid input, missing entity, unknown tool, CORS, malformed and oversized requests, and website/API routes (including legacy aliases).",
   );
 } finally {
   await client.close();

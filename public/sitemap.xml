@@ -2,5 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://ecuadorabierto.com/</loc></url>
   <url><loc>https://ecuadorabierto.com/compras/</loc></url>
+  <url><loc>https://ecuadorabierto.com/presupuesto/</loc></url>
+  <url><loc>https://ecuadorabierto.com/datos/</loc></url>
   <url><loc>https://ecuadorabierto.com/developers</loc></url>
 </urlset>
