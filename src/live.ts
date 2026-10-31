@@ -20,13 +20,25 @@ export class UpstreamError extends Error {
 }
 
 async function getJson(url: string, source: string): Promise<unknown> {
-  let res: Response;
-  try {
-    res = await fetch(url, {
+  const get = () =>
+    fetch(url, {
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(20_000),
-      cf: { cacheTtl: 3600, cacheEverything: true },
+      // Cache answers, never rate limits or outages.
+      cf: {
+        cacheEverything: true,
+        cacheTtlByStatus: { "200-299": 3600, "404": 3600, "400-599": 0 },
+      },
     });
+  let res: Response;
+  try {
+    res = await get();
+    // SERCOP rate-limits shared Cloudflare egress IPs now and then: retry once.
+    if (res.status === 429 || res.status === 503) {
+      const wait = Math.min(Number(res.headers.get("retry-after")) || 1, 3);
+      await new Promise((r) => setTimeout(r, wait * 1000));
+      res = await get();
+    }
   } catch {
     throw new UpstreamError(`${source} did not respond. Try again later.`, 504);
   }
