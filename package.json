@@ -1,0 +1,37 @@
+{
+  "name": "ecuador-gasto",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prototype: what each Ecuadorian public entity buys and from whom, built from SERCOP open contracting data (OCDS).",
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/build-data.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "types": "wrangler types",
+    "test:mcp": "node scripts/test-mcp.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "fflate": "^0.8.2",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davo20019/ecuador-gasto.git"
+  },
+  "homepage": "https://ecuador-gasto.davo20019.workers.dev",
+  "bugs": {
+    "url": "https://github.com/davo20019/ecuador-gasto/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  // Cloudflare Worker for the "¿En qué se gasta?" prototype.
+  // Static data (built by `npm run data`) is served from ./public via Workers Static Assets;
+  // the Worker answers /api/* and lets everything else fall through to the assets.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ecuador-gasto",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/mcp", "/mcp/*"],
+  },
+  "observability": { "enabled": true },
+}

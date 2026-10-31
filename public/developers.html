@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MCP y API · Ecuador Gasto</title>
+    <meta
+      name="description"
+      content="Conecta agentes a las compras públicas del Ecuador con MCP. Endpoint público, herramientas de consulta y datos del SERCOP."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <nav class="topbar wrap">
+      <a class="wordmark" href="/"
+        ><span class="mark">↗</span> Ecuador / Gasto público</a
+      ><a href="/">← Explorar</a>
+    </nav>
+    <main class="wrap docs">
+      <div class="eyebrow">DATOS ABIERTOS / PARA DESARROLLADORES</div>
+      <h1>Datos públicos.<br /><em>Listos para tus agentes.</em></h1>
+      <p class="intro">
+        Consulta entidades, proveedores y montos adjudicados desde cualquier
+        cliente compatible con MCP remoto.
+      </p>
+      <section class="card">
+        <h2>Conecta por MCP</h2>
+        <p>
+          Agrega un servidor remoto en tu cliente MCP y pega esta dirección:
+        </p>
+        <pre id="endpoint">https://ecuador-gasto.davo20019.workers.dev/mcp</pre>
+        <button class="button" id="copy">Copiar dirección</button
+        ><span id="copy-status" role="status"></span>
+        <p class="muted">
+          Transporte: Streamable HTTP · Acceso público · Solo lectura · Sin
+          token ni cuenta. Requiere un cliente con soporte para servidores MCP
+          remotos.
+        </p>
+        <p>
+          Ejemplo para clientes que aceptan configuración JSON con
+          <code>type: "http"</code>:
+        </p>
+        <pre>
+{
+  "mcpServers": {
+    "ecuador-gasto": {
+      "type": "http",
+      "url": "https://ecuador-gasto.davo20019.workers.dev/mcp"
+    }
+  }
+}</pre>
+        <p class="muted">
+          El formato de configuración varía según el cliente. Si tiene una
+          pantalla para añadir servidores remotos, usa directamente la URL.
+        </p>
+      </section>
+      <section class="card">
+        <h2>Cuatro herramientas, una fuente</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Herramienta</th>
+                <th>Consulta</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>get_dataset_info</code></td>
+                <td>
+                  Periodo disponible, fecha de actualización, fuente y licencia.
+                </td>
+              </tr>
+              <tr>
+                <td><code>search_entities</code></td>
+                <td>
+                  Busca por <code>query</code>, <code>province</code> y
+                  <code>kind</code>. Paginación con <code>limit</code> (1–100) y
+                  <code>offset</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><code>get_entity</code></td>
+                <td>
+                  Usa el <code>ruc</code> de una entidad: compras por mes,
+                  principales proveedores, adjudicaciones y señales de revisión.
+                </td>
+              </tr>
+              <tr>
+                <td><code>list_provinces</code></td>
+                <td>
+                  Ranking provincial. <code>local_only</code> es verdadero por
+                  defecto; falso incluye todas las entidades.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted">
+          Tipos: municipio, prefectura, parroquia, empresa, otro. Recurso MCP:
+          <code>ecuador-gasto://dataset/info</code>. Cada resultado incluye
+          metadatos y límites de interpretación.
+        </p>
+      </section>
+      <section class="card">
+        <h2>Empieza con una pregunta</h2>
+        <p>
+          “Busca el municipio de Cuenca. Revisa el periodo disponible y resume
+          sus tres principales proveedores, citando la fuente.”
+        </p>
+        <p>
+          “Compara el monto adjudicado por los gobiernos locales de Azuay y
+          Manabí. Explica qué incluyen esas cifras.”
+        </p>
+      </section>
+      <section class="card">
+        <h2>También hay una API JSON</h2>
+        <ul>
+          <li>
+            <a href="/api/meta"><code>GET /api/meta</code></a>
+          </li>
+          <li>
+            <a href="/api/buyers?q=cuenca&amp;kind=municipio"
+              ><code>GET /api/buyers?q=cuenca&amp;kind=municipio</code></a
+            >
+          </li>
+          <li><code>GET /api/buyers/:ruc</code></li>
+          <li>
+            <a href="/api/provinces"><code>GET /api/provinces</code></a>
+          </li>
+        </ul>
+      </section>
+      <section class="card">
+        <h2>Antes de interpretar los datos</h2>
+        <p>
+          Esta es una instantánea de adjudicaciones del SERCOP, no una consulta
+          en tiempo real. Consulta los metadatos para saber la cobertura y fecha
+          de procesamiento.
+        </p>
+        <p>
+          No incluye el presupuesto completo, sueldos, pensiones, deuda ni
+          transferencias. Los montos adjudicados no equivalen a pagos
+          ejecutados. La provincia se infiere del RUC y puede reflejar límites
+          históricos o la sede de la entidad. Las señales son motivos de
+          revisión, no pruebas de irregularidad.
+        </p>
+        <p>
+          No publicamos identificadores de proveedores. Fuente:
+          <a href="https://datosabiertos.compraspublicas.gob.ec/PLATAFORMA"
+            >SERCOP</a
+          >
+          ·
+          <a href="https://creativecommons.org/licenses/by/3.0/ec/"
+            >CC BY 3.0 EC</a
+          >.
+        </p>
+      </section>
+    </main>
+    <footer class="wrap">
+      Ecuador / Gasto público · Un proyecto independiente para entender las
+      compras públicas.
+    </footer>
+    <script>
+      document.getElementById("copy").onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(
+            document.getElementById("endpoint").textContent,
+          );
+          document.getElementById("copy-status").textContent =
+            " Dirección copiada.";
+        } catch {
+          document.getElementById("copy-status").textContent =
+            " Selecciona la dirección y cópiala manualmente.";
+        }
+      };
+    </script>
+  </body>
+</html>
