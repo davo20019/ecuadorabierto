@@ -14,9 +14,9 @@
         height: 630px;
         overflow: hidden;
         background:
-          radial-gradient(ellipse at 92% 0%, #dbe6d3 0, transparent 60%),
-          #f5f4ee;
-        color: #173e34;
+          radial-gradient(ellipse at 92% 0%, #fff1b8 0, transparent 60%),
+          #f4f6fa;
+        color: #0b2545;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         padding: 64px 80px;
         display: flex;
@@ -37,7 +37,7 @@
       }
       .top span {
         font-weight: 400;
-        color: #65766c;
+        color: #5a6b85;
         font-size: 26px;
         letter-spacing: 0;
       }
@@ -54,7 +54,7 @@
         width: 11px;
         height: 11px;
         border-radius: 50%;
-        background: #337a5c;
+        background: #034ea2;
       }
       h1 {
         margin-top: 22px;
@@ -65,7 +65,7 @@
         letter-spacing: -4.5px;
       }
       h1 em {
-        color: #548269;
+        color: #034ea2;
       }
       .foot {
         margin-top: auto;
@@ -73,10 +73,10 @@
         justify-content: space-between;
         align-items: flex-end;
         font-size: 24px;
-        color: #65766c;
+        color: #5a6b85;
       }
       .foot b {
-        color: #154b3a;
+        color: #034ea2;
         font-weight: 650;
       }
       .tags {
@@ -84,12 +84,24 @@
         gap: 10px;
       }
       .tags span {
-        border: 1.5px solid #c9d4c5;
+        border: 1.5px solid #c5d0e2;
         border-radius: 999px;
         padding: 8px 18px;
         font-size: 19px;
-        color: #173e34;
-        background: #fffefa;
+        color: #0b2545;
+        background: #ffffff;
+      }
+      .flag {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 24px;
+        background: linear-gradient(
+          #ffd100 0 50%,
+          #034ea2 50% 75%,
+          #d52b1e 75%
+        );
       }
       .rule {
         position: absolute;
@@ -98,11 +110,12 @@
         writing-mode: vertical-rl;
         letter-spacing: 9px;
         font-size: 17px;
-        color: #7e957b;
+        color: #7d8ba3;
       }
     </style>
   </head>
   <body>
+    <div class="flag"></div>
     <div class="top">
       <img src="../../public/favicon.svg" alt="" />Ecuador Abierto
       <span id="module"></span>

@@ -1,16 +1,30 @@
 :root {
-  --bg: #f5f4ee;
-  --card: #fffefa;
-  --ink: #173e34;
-  --muted: #65766c;
-  --line: #dde3d9;
-  --brand: #154b3a;
-  --brand-ink: #fffefa;
-  --accent: #e8c96b;
-  --bar: #337a5c;
-  --bar-soft: #e7eee4;
-  --warn-bg: #fbf1d4;
-  --warn-ink: #765719;
+  /* Ecuador flag: yellow, blue and red in 2:1:1 bands. */
+  --flag-yellow: #ffd100;
+  --flag-blue: #034ea2;
+  --flag-red: #d52b1e;
+  --bg: #f4f6fa;
+  --card: #ffffff;
+  --ink: #0b2545;
+  --muted: #5a6b85;
+  --line: #dde3ee;
+  --brand: var(--flag-blue);
+  --brand-ink: #ffffff;
+  --accent: var(--flag-yellow);
+  --bar: var(--flag-blue);
+  --bar-soft: #e6edf8;
+  --warn-bg: #fff4c2;
+  --warn-ink: #6b5200;
+}
+body::before {
+  content: "";
+  display: block;
+  height: 12px;
+  background: linear-gradient(
+    var(--flag-yellow) 0 50%,
+    var(--flag-blue) 50% 75%,
+    var(--flag-red) 75%
+  );
 }
 * {
   box-sizing: border-box;
@@ -44,7 +58,7 @@ select {
   -webkit-tap-highlight-color: transparent;
 }
 :focus-visible {
-  outline: 3px solid #bd8d27;
+  outline: 3px solid var(--brand);
   outline-offset: 4px;
 }
 button {
@@ -102,7 +116,7 @@ a {
 header {
   border-top: 1px solid var(--line);
   padding: 55px 0 0;
-  background: radial-gradient(ellipse at 90% 5%, #e0e9d9 0, transparent 55%);
+  background: radial-gradient(ellipse at 90% 5%, #fff3c4 0, transparent 55%);
 }
 .eyebrow {
   font-size: 10px;
@@ -128,7 +142,7 @@ h1 {
 }
 h1 em {
   font-weight: 400;
-  color: #548269;
+  color: var(--brand);
 }
 .intro {
   max-width: 500px;
@@ -149,15 +163,15 @@ h1 em {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin-top: 42px;
-  border-top: 1px solid #ccd9c9;
-  border-bottom: 1px solid #ccd9c9;
+  border-top: 1px solid #d3dbe8;
+  border-bottom: 1px solid #d3dbe8;
 }
 .kpi {
   padding: 23px 0 25px;
 }
 .kpi + .kpi {
   padding-left: 35px;
-  border-left: 1px solid #ccd9c9;
+  border-left: 1px solid #d3dbe8;
 }
 .kpi b {
   font-size: 34px;
@@ -186,7 +200,7 @@ main {
   border-radius: 18px;
   padding: 28px;
   margin-bottom: 22px;
-  box-shadow: 0 3px 5px #193a2603;
+  box-shadow: 0 3px 5px #0b254505;
 }
 h2 {
   font-size: 22px;
@@ -208,12 +222,12 @@ h2 {
   width: 100%;
   min-width: 0;
   padding: 16px 18px;
-  border: 1px solid #bdcebe;
+  border: 1px solid #c5d0e2;
   border-radius: 10px;
   background: #fff;
   color: var(--ink);
   font-size: 14px;
-  box-shadow: 0 2px 3px #163c3105;
+  box-shadow: 0 2px 3px #0b254505;
 }
 .chips {
   display: flex;
@@ -272,7 +286,7 @@ h2 {
   transition: background 0.15s;
 }
 .results a:hover {
-  background: #eff4eb;
+  background: #edf2fa;
 }
 .entity-icon {
   flex: none;
@@ -280,9 +294,9 @@ h2 {
   place-items: center;
   width: 34px;
   height: 36px;
-  background: #edf1e8;
+  background: #edf2fa;
   border-radius: 8px;
-  color: #6e8c73;
+  color: #5a76a3;
   font-size: 20px;
 }
 .entity-name {
@@ -307,14 +321,14 @@ h2 {
 .arrow {
   font-size: 13px;
   margin-left: 10px;
-  color: #7e9583;
+  color: #7d8ba3;
 }
 .more {
   width: 100%;
   padding: 13px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f4f6ef;
+  background: #f1f4f9;
   color: var(--brand);
   margin-top: 14px;
   font-size: 12px;
@@ -381,7 +395,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   gap: 25px;
-  background: #e7eddf;
+  background: #e6edf8;
   border-radius: 18px;
   padding: 32px;
   max-width: 1156px;
@@ -526,8 +540,8 @@ th {
 }
 .docs pre {
   padding: 22px;
-  background: #173e34;
-  color: #e5eedc;
+  background: var(--ink);
+  color: #e6edf8;
   border-radius: 10px;
   overflow: auto;
   font-size: 13px;
@@ -583,7 +597,7 @@ a.module:hover {
     writing-mode: vertical-rl;
     letter-spacing: 7px;
     font-size: 12px;
-    color: #7e957b;
+    color: #7d8ba3;
   }
 }
 @media (max-width: 850px) {

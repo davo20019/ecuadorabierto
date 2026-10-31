@@ -1,4 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#154b3a"/>
-  <path d="M20 44 44 20M25 20h19v19" fill="none" stroke="#e8c96b" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <clipPath id="r"><rect width="64" height="64" rx="16"/></clipPath>
+  <g clip-path="url(#r)">
+    <rect width="64" height="64" fill="#034ea2"/>
+    <rect y="54" width="64" height="10" fill="#d52b1e"/>
+  </g>
+  <path d="M19 41 41 19M23 19h18v18" fill="none" stroke="#ffd100" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

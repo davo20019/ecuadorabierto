@@ -20,7 +20,7 @@ shot "file://$TMP/fav.html" 512 512 "$TMP/fav512.png"
 magick "$TMP/fav512.png" -resize 512x512 public/icon-512.png
 magick "$TMP/fav512.png" -resize 192x192 public/icon-192.png
 # Apple ignores transparency; give the touch icon a solid brand background.
-magick "$TMP/fav512.png" -background "#154b3a" -flatten -resize 180x180 public/apple-touch-icon.png
+magick "$TMP/fav512.png" -background "#034ea2" -flatten -resize 180x180 public/apple-touch-icon.png
 magick "$TMP/fav512.png" -define icon:auto-resize=48,32,16 public/favicon.ico
 
 shot "file://$PWD/scripts/brand/og.html" 1200 630 public/og.png
