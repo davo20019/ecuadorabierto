@@ -496,7 +496,10 @@
           const d = await r.json();
           if (mine !== pSeq) return;
           document.getElementById("pcount").textContent =
-            `${d.total.toLocaleString("es-EC")} ${d.total === 1 ? "contrato" : "contratos"}`;
+            `${d.total.toLocaleString("es-EC")} ${d.total === 1 ? "contrato" : "contratos"}` +
+            (d.stale
+              ? ` · el SERCOP no responde; resultados guardados el ${new Date(d.fetchedAt).toLocaleString("es-EC", { dateStyle: "medium", timeStyle: "short" })}`
+              : "");
           document.getElementById("pmore").hidden = !d.nextPage;
           const html = d.results
             .map(

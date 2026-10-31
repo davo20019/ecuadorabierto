@@ -3,9 +3,11 @@
 // - SERCOP OCDS API: search procurement processes and read one record by ocid.
 // - datosabiertos.gob.ec CKAN API: search and describe Ecuador's open-data catalog.
 //
-// Upstream servers are slow and sometimes return 503, so every call has a timeout,
-// responses are cached at the edge for an hour, and failures surface as UpstreamError
-// with a message that says which source is down (never a silent empty result).
+// Upstream servers are slow, return 503s, and SERCOP allows 60 requests per window per
+// IP (shared with every other Worker on the same Cloudflare egress IP). So every call
+// has a timeout, answers are kept in the edge cache, and when the source refuses or is
+// down a previously seen answer is served marked stale. Only a request never seen
+// before fails, as UpstreamError with a message naming the source.
 
 const SERCOP = "https://datosabiertos.compraspublicas.gob.ec/PLATAFORMA/api";
 const CKAN = "https://www.datosabiertos.gob.ec/api/3/action";
@@ -19,16 +21,19 @@ export class UpstreamError extends Error {
   }
 }
 
-async function getJson(url: string, source: string): Promise<unknown> {
+// How long a cached answer counts as fresh, in seconds. Copies are kept for a week
+// so they can stand in when the source is unavailable.
+const FRESH = { search: 3600, record: 6 * 3600, catalog: 6 * 3600 };
+const KEEP = 7 * 24 * 3600;
+
+// Freshness of a live answer, included in API and MCP results.
+export type Retrieved = { fetchedAt: string; stale: boolean };
+
+async function upstream(url: string, source: string): Promise<unknown> {
   const get = () =>
     fetch(url, {
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(20_000),
-      // Cache answers, never rate limits or outages.
-      cf: {
-        cacheEverything: true,
-        cacheTtlByStatus: { "200-299": 3600, "404": 3600, "400-599": 0 },
-      },
     });
   let res: Response;
   try {
@@ -51,6 +56,45 @@ async function getJson(url: string, source: string): Promise<unknown> {
     return await res.json();
   } catch {
     throw new UpstreamError(`${source} returned an unexpected response.`);
+  }
+}
+
+async function getJson(
+  url: string,
+  source: string,
+  fresh: number,
+): Promise<{ body: unknown } & Retrieved> {
+  // Cache API is per data center and a no-op on workers.dev; it is best effort.
+  const cache = caches.default;
+  const key = new Request(
+    `https://ecuadorabierto.com/__upstream/${encodeURIComponent(url)}`,
+  );
+  const hit = await cache.match(key).catch(() => undefined);
+  const cachedAt = hit?.headers.get("x-fetched-at");
+  const age = cachedAt ? (Date.now() - Date.parse(cachedAt)) / 1000 : Infinity;
+  if (hit && age < fresh)
+    return { body: await hit.json(), fetchedAt: cachedAt!, stale: false };
+  try {
+    const body = await upstream(url, source);
+    const fetchedAt = new Date().toISOString();
+    await cache
+      .put(
+        key,
+        new Response(JSON.stringify(body), {
+          headers: {
+            "content-type": "application/json",
+            "cache-control": `public, max-age=${KEEP}`,
+            "x-fetched-at": fetchedAt,
+          },
+        }),
+      )
+      .catch(() => {});
+    return { body, fetchedAt, stale: false };
+  } catch (e) {
+    // Rate limited or down: an older answer beats an error. A 404 is an answer.
+    if (hit && cachedAt && !(e instanceof UpstreamError && e.status === 404))
+      return { body: await hit.json(), fetchedAt: cachedAt, stale: true };
+    throw e;
   }
 }
 
@@ -100,7 +144,8 @@ export async function searchProcesses(p: {
   if (p.query) qs.set("search", p.query);
   if (p.buyer) qs.set("buyer", p.buyer);
   if (p.supplier) qs.set("supplier", p.supplier);
-  const d = (await getJson(`${SERCOP}/search_ocds?${qs}`, "SERCOP")) as {
+  const got = await getJson(`${SERCOP}/search_ocds?${qs}`, "SERCOP", FRESH.search);
+  const d = got.body as {
     total: number;
     page: number;
     pages: number;
@@ -127,6 +172,8 @@ export async function searchProcesses(p: {
       date: r.date,
       url: processUrl(r.ocid),
     })),
+    fetchedAt: got.fetchedAt,
+    stale: got.stale,
   };
 }
 
@@ -163,10 +210,12 @@ type Release = {
 // A compiled OCDS record, reduced to what a reader needs. Supplier and party
 // identifiers are dropped: a natural person's RUC contains their cédula.
 export async function getProcess(ocid: string) {
-  const d = (await getJson(
+  const got = await getJson(
     `${SERCOP}/record?ocid=${encodeURIComponent(ocid)}`,
     "SERCOP",
-  )) as { releases?: Release[] };
+    FRESH.record,
+  );
+  const d = got.body as { releases?: Release[] };
   const r = d?.releases?.at(-1);
   if (!r) throw new UpstreamError("Not found", 404);
   const buyerRuc = (r.buyer?.id?.match(/(\d{13})/) || [])[1] ?? null;
@@ -207,6 +256,8 @@ export async function getProcess(ocid: string) {
       amount: num(c.value?.amount),
     })),
     url: processUrl(r.ocid),
+    fetchedAt: got.fetchedAt,
+    stale: got.stale,
   };
 }
 
@@ -240,14 +291,19 @@ type CkanPackage = {
   resources?: CkanResource[];
 };
 
-async function ckan<T>(action: string, qs: URLSearchParams): Promise<T> {
-  const d = (await getJson(`${CKAN}/${action}?${qs}`, "datosabiertos.gob.ec")) as {
-    success?: boolean;
-    result?: T;
-  };
+async function ckan<T>(
+  action: string,
+  qs: URLSearchParams,
+): Promise<{ result: T } & Retrieved> {
+  const got = await getJson(
+    `${CKAN}/${action}?${qs}`,
+    "datosabiertos.gob.ec",
+    FRESH.catalog,
+  );
+  const d = got.body as { success?: boolean; result?: T };
   if (!d?.success || d.result === undefined)
     throw new UpstreamError("Not found", 404);
-  return d.result;
+  return { result: d.result, fetchedAt: got.fetchedAt, stale: got.stale };
 }
 
 const datasetUrl = (name: string) =>
@@ -285,24 +341,27 @@ export async function searchDatasets(p: {
   // Solr filter values are quoted, so a publisher id cannot inject query syntax.
   if (p.publisher)
     qs.set("fq", `organization:"${p.publisher.replace(/["\\]/g, "")}"`);
-  const r = await ckan<{ count: number; results: CkanPackage[] }>(
-    "package_search",
-    qs,
-  );
+  const { result: r, fetchedAt, stale } = await ckan<{
+    count: number;
+    results: CkanPackage[];
+  }>("package_search", qs);
   return {
     total: r.count,
     offset: p.offset,
     limit: p.limit,
     nextOffset: p.offset + p.limit < r.count ? p.offset + p.limit : null,
     results: r.results.map(summary),
+    fetchedAt,
+    stale,
   };
 }
 
 export async function getDataset(id: string) {
-  const p = await ckan<CkanPackage>(
-    "package_show",
-    new URLSearchParams({ id }),
-  );
+  const {
+    result: p,
+    fetchedAt,
+    stale,
+  } = await ckan<CkanPackage>("package_show", new URLSearchParams({ id }));
   return {
     ...summary(p),
     description: p.notes?.slice(0, 4000) ?? null,
@@ -316,11 +375,13 @@ export async function getDataset(id: string) {
       url: r.url ?? null,
       modified: (r.last_modified ?? r.created ?? "").slice(0, 10) || null,
     })),
+    fetchedAt,
+    stale,
   };
 }
 
 export async function listPublishers() {
-  const r = await ckan<
+  const { result: r } = await ckan<
     { name: string; title: string; package_count: number }[]
   >(
     "organization_list",

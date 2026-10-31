@@ -141,6 +141,7 @@
 
       let results = [],
         total = 0,
+        staleAt = null,
         seq = 0;
 
       async function search(append) {
@@ -160,6 +161,7 @@
           if (mine !== seq) return; // a newer search started
           results = append ? results.concat(d.results) : d.results;
           total = d.total;
+          staleAt = d.stale ? d.fetchedAt : null;
           render();
         } catch {
           if (mine !== seq) return;
@@ -172,7 +174,10 @@
 
       function render() {
         document.getElementById("result-count").textContent =
-          `${total.toLocaleString("es-EC")} ${total === 1 ? "conjunto de datos" : "conjuntos de datos"}`;
+          `${total.toLocaleString("es-EC")} ${total === 1 ? "conjunto de datos" : "conjuntos de datos"}` +
+          (staleAt
+            ? ` · el portal no responde; resultados guardados el ${new Date(staleAt).toLocaleString("es-EC", { dateStyle: "medium", timeStyle: "short" })}`
+            : "");
         document.getElementById("more").hidden = results.length >= total;
         document.getElementById("results").innerHTML =
           results
